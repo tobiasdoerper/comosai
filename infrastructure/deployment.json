@@ -88,7 +88,7 @@
         },
         "AzureSearchTopK": {
             "type": "int",
-            "defaultValue": 5,
+            "defaultValue": 20,
             "metadata": {
                 "description": "Top K results"
             }
@@ -142,7 +142,7 @@
         },
         "AzureOpenAIModelName": {
             "type": "string",
-            "defaultValue": "gpt-35-turbo",
+            "defaultValue": "gpt-4-turbo-128k-1106",
             "metadata": {
                 "description": "Azure OpenAI Model Name"
             }
@@ -155,14 +155,14 @@
         },
         "AzureOpenAITemperature": {
             "type": "int",
-            "defaultValue": 0,
+            "defaultValue": 0.7,
             "metadata": {
                 "description": "Azure OpenAI Temperature"
             }
         },
         "AzureOpenAITopP": {
             "type": "int",
-            "defaultValue": 1,
+            "defaultValue": 0.95,
             "metadata": {
                 "description": "Azure OpenAI Top P"
             }
@@ -183,7 +183,7 @@
         },
         "AzureOpenAISystemMessage": {
             "type": "string",
-            "defaultValue": "You are an AI assistant that helps people find information.",
+            "defaultValue": "•\tYou are a COMOS Expert chatbot whose primary goal is to help users to configure, develop and to customize the software COMOS;\n•\tProvide concise replies that are polite and professional; \n•\tAnswer questions truthfully based on the provided information; \n•\tAlways provide coding examples when asked about coding functions;\n•\tDo not answer questions that are not related to SIEMENS Software and programing code and respond with \"I can only help with questions related to SIEMENS Process Automation software.\"; \n•\tIf you do not know the answer to a question, respond by saying “I do not know the answer to your question, Please give more details and I’ll try help you again.”.\n",
             "metadata": {
                 "description": "Azure OpenAI System Message"
             }
@@ -204,7 +204,7 @@
         },
         "AzureSearchQueryType": {
             "type": "string",
-            "defaultValue": "simple",
+            "defaultValue": "vectorSimpleHybrid",
             "allowedValues": [
                 "simple",
                 "semantic",
@@ -232,7 +232,7 @@
         },
         "AzureSearchStrictness": {
             "type": "int",
-            "defaultValue": 3,
+            "defaultValue": 5,
             "allowedValues": [
                 1,
                 2,
