@@ -38,7 +38,7 @@ if DEBUG_LOGGING:
 
 # On Your Data Settings
 DATASOURCE_TYPE = os.environ.get("DATASOURCE_TYPE", "AzureCognitiveSearch")
-SEARCH_TOP_K = os.environ.get("SEARCH_TOP_K", 20)
+SEARCH_TOP_K = os.environ.get("SEARCH_TOP_K", 5)
 SEARCH_STRICTNESS = os.environ.get("SEARCH_STRICTNESS", 5)
 SEARCH_ENABLE_IN_DOMAIN = os.environ.get("SEARCH_ENABLE_IN_DOMAIN", "true")
 
