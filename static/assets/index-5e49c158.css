@@ -6,6 +6,10 @@ pre, code {
   font-family: 'Fira Code', monospace; /* Fallback to generic monospace font if 'Fira Code' is not available */
 }
 .code-container {
-    background: black;
-    color: white;
+    background: black; /* fundo preto */
+    color: white; /* texto branco */
+    padding: 20px; /* espaçamento interno de 20 pixels */
+    margin: 20px; /* margem externa de 20 pixels */
+    border-radius: 8px; /* borda arredondada */
+    font-family: 'Fira Code', monospace; /* Usamos a fonte 'Fira Code' para o código */
 }
