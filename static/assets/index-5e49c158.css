@@ -5,3 +5,7 @@
 pre, code {
   font-family: 'Fira Code', monospace; /* Fallback to generic monospace font if 'Fira Code' is not available */
 }
+.code-container {
+    background: black;
+    color: white;
+}
