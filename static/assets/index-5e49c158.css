@@ -11,5 +11,5 @@ pre, code {
     padding: 20px; /* espaçamento interno de 20 pixels */
     margin: 20px; /* margem externa de 20 pixels */
     border-radius: 8px; /* borda arredondada */
-    font-family: 'Fira Code', monospace; /* Usamos a fonte 'Fira Code' para o código */
+    font-family:  monospace; /* Usamos a fonte 'Fira Code' para o código */
 }
