@@ -9,7 +9,8 @@
   <style>
     /* CSS styling for code blocks */
     .code-container {
-      background: #f2f2f2;
+      background: black;
+      color: white;
       padding: 20px;
       margin: 20px;
       border-radius: 8px;
@@ -20,30 +21,32 @@
   <div id="root">
     <!-- Your existing HTML content -->
 
-    <!-- XML Code Display Section -->
-    <div class="code-container">
-      <!-- The XML code will be dynamically inserted here -->
-      <pre><code id="xmlCode" class="language-xml"><!-- XML code will be inserted here --></code></pre>
+    <!-- Code Display Section -->
+    <div class="code-container" id="codeContainer">
+      <!-- The code snippet will be dynamically inserted here -->
+      <pre><code id="codeSnippet"><!-- Code snippet will be inserted here --></code></pre>
     </div>
   </div>
 
-  <!-- Example JavaScript code to update XML content -->
+  <!-- JavaScript to update code snippet dynamically -->
   <script>
-    // Function to update the content of the XML code
-    function updateXmlCode(xml) {
+    // Function to update the content of the code snippet
+    function updateCodeSnippet(code) {
       // Get the <code> element
-      var xmlCodeElement = document.getElementById('xmlCode');
+      var codeSnippetElement = document.getElementById('codeSnippet');
 
-      // Set the inner HTML of the <code> element to the generated XML
-      xmlCodeElement.textContent = xml;
+      // Set the inner HTML of the <code> element to the generated code
+      codeSnippetElement.textContent = code;
     }
 
-    // Example usage: call the updateXmlCode function with the generated XML
-    var generatedXml = '<?xml version="1.0" encoding="UTF-8"?><root><child>Hello, World!</child></root>';
-    updateXmlCode(generatedXml);
+    // Simulate receiving a response from the AI with a code snippet
+    var generatedCode = '<?xml version="1.0" encoding="UTF-8"?><root><child>Hello, World!</child></root>';
+    updateCodeSnippet(generatedCode);
   </script>
 </body>
 </html>
+
+
 
 
 
