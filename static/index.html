@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>COMOS AI BY SIEMENS</title>
   <link rel="stylesheet" href="/assets/index-5e49c158.css">
+  <!-- Include Prism.js script from a CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+  <!-- Include Prism.js XML language support from a CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-xml.min.js"></script>
   <style>
     /* CSS styling for code blocks */
     .code-container {
@@ -20,43 +24,20 @@
   <div id="root">
     <!-- Your existing HTML content -->
     
-    <!-- Code Display Section -->
-    <div id="codeDisplayContainer"></div>
+    <!-- XML Code Display Section -->
+    <div id="xmlDisplayContainer">
+      <!-- Code snippet with Prism.js syntax highlighting -->
+      <pre><code class="language-xml">
+        <?xml version="1.0" encoding="UTF-8"?>
+        <root>
+          <child>Hello, World!</child>
+        </root>
+      </code></pre>
+    </div>
   </div>
-  
-  <script>
-    // Function to check if a string contains code snippets
-    function containsCode(text) {
-      // Regular expression to match common code patterns
-      var codePattern = /<code[\s\S]*?<\/code>|<pre[\s\S]*?<\/pre>/gi;
-      return codePattern.test(text);
-    }
-    
-    // Function to display code snippets in a container
-    function displayCode(text) {
-      // Check if the text contains code snippets
-      if (containsCode(text)) {
-        // Create a new div element for the code container
-        var codeContainer = document.createElement('div');
-        codeContainer.classList.add('code-container');
-        
-        // Set the inner HTML of the code container to the text
-        codeContainer.innerHTML = text;
-        
-        // Append the code container to the code display container
-        var codeDisplayContainer = document.getElementById('codeDisplayContainer');
-        codeDisplayContainer.appendChild(codeContainer);
-      }
-    }
-    
-    // Example usage: Call displayCode function with AI response
-    // Simulating AI response
-    var aiResponse = 'This is an example response with <code>code snippets</code> and <pre>preformatted text</pre>.';
-    // Call the displayCode function with AI response
-    displayCode(aiResponse);
-  </script>
 </body>
 </html>
+
 
 
 
