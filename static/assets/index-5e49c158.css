@@ -2,16 +2,6 @@
 /* Your existing CSS code */
 
 
-/* Paste the new rule at the end */
-pre, code {
-  font-family: 'Fira Code', monospace; /* Fallback to generic monospace font if 'Fira Code' is not available */
-}
-.code-container {
-    background: black; /* Black background */
-    color: white; /* White text */
-    padding: 20px; /* Adjust padding as needed */
-    margin: 20px; /* Adjust margin as needed */
-    border-radius: 8px; /* Adjust border radius as needed */
-    font-family: 'Fira Code', monospace; /* Use 'Fira Code' font for code */
-}
+
+
 
