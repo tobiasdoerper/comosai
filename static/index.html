@@ -1,51 +1,18 @@
-<!DOCTYPE html>
+HTML : <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>COMOS AI BY SIEMENS</title>
-  <link rel="stylesheet" href="/assets/index-5e49c158.css">
-  <style>
-    /* CSS styling for code blocks */
-    .code-container {
-      background: black;
-      color: white;
-      padding: 20px;
-      margin: 20px;
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body>
-  <div id="root">
-    <!-- Your existing HTML content -->
-
-    <!-- Code Display Section -->
-    <div class="code-container" id="codeContainer">
-      <!-- The code snippet will be dynamically inserted here -->
-      <pre><code id="codeSnippet"><!-- Code snippet will be inserted here --></code></pre>
-    </div>
-  </div>
-
-  <!-- JavaScript to update code snippet dynamically -->
-  <script>
-    // Function to update the content of the code snippet
-    function updateCodeSnippet(code) {
-      // Get the <code> element
-      var codeSnippetElement = document.getElementById('codeSnippet');
-
-      // Set the inner HTML of the <code> element to the generated code
-      codeSnippetElement.textContent = code;
-    }
-
-    // Simulate receiving a response from the AI with a code snippet
-    var generatedCode = '<?xml version="1.0" encoding="UTF-8"?><root><child>Hello, World!</child></root>';
-    updateCodeSnippet(generatedCode);
-  </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COMOS AI BY SIEMENS</title>
+    <script type="module" crossorigin src="/assets/index-c8bc2c87.js"></script>
+    <link rel="stylesheet" href="/assets/index-5e49c158.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    
+  </body>
 </html>
-
 
 
 
