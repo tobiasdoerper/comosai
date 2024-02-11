@@ -6,10 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>COMOS AI BY SIEMENS</title>
   <link rel="stylesheet" href="/assets/index-5e49c158.css">
-  <!-- Include Prism.js script from a CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
-  <!-- Include Prism.js XML language support from a CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-xml.min.js"></script>
   <style>
     /* CSS styling for code blocks */
     .code-container {
@@ -23,18 +19,29 @@
 <body>
   <div id="root">
     <!-- Your existing HTML content -->
-    
+
     <!-- XML Code Display Section -->
-    <div id="xmlDisplayContainer">
-      <!-- Code snippet with Prism.js syntax highlighting -->
-      <pre><code class="language-xml">
-        <?xml version="1.0" encoding="UTF-8"?>
-        <root>
-          <child>Hello, World!</child>
-        </root>
-      </code></pre>
+    <div class="code-container">
+      <!-- The XML code will be dynamically inserted here -->
+      <pre><code id="xmlCode" class="language-xml"><!-- XML code will be inserted here --></code></pre>
     </div>
   </div>
+
+  <!-- Example JavaScript code to update XML content -->
+  <script>
+    // Function to update the content of the XML code
+    function updateXmlCode(xml) {
+      // Get the <code> element
+      var xmlCodeElement = document.getElementById('xmlCode');
+
+      // Set the inner HTML of the <code> element to the generated XML
+      xmlCodeElement.textContent = xml;
+    }
+
+    // Example usage: call the updateXmlCode function with the generated XML
+    var generatedXml = '<?xml version="1.0" encoding="UTF-8"?><root><child>Hello, World!</child></root>';
+    updateXmlCode(generatedXml);
+  </script>
 </body>
 </html>
 
