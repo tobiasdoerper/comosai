@@ -1,24 +1,37 @@
-<!DOCTYPE html>  
-<html lang="en">  
-<head>  
-  <meta charset="UTF-8" />  
-  <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
-  <title>COMOS AI BY SIEMENS</title>  
-  <link rel="stylesheet" href="/assets/index-5e49c158.css">  
-</head>  
-<body>  
-  <div id="root">  
-    <!-- Your existing HTML content -->  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COMOS AI BY SIEMENS</title>
+  <link rel="stylesheet" href="/assets/index-5e49c158.css">
+</head>
+<body>
+  <div id="root">
+    <!-- Your existing HTML content -->
+    
+    <!-- XML Code Display Section -->
+    <div id="xmlDisplayContainer">
+      <pre id="xmlCode"></pre>
+    </div>
+  </div>
   
-    <!-- XML Code Display Section -->  
-    <div id="xmlDisplayContainer">  
-      <pre id="xmlCode"></pre>  
-    </div>  
-  </div>  
-  
-  <!-- Include your JavaScript file -->  
-  <script src="/assets/index-c8bc2c87.js"></script>  
-</body>  
-</html>  
+  <script>
+    // Function to update the content of the XML code
+    function updateXmlCode(xml) {
+      // Get the <pre> element
+      var xmlCodeElement = document.getElementById('xmlCode');
+      
+      // Set the inner HTML of the <pre> element to the generated XML
+      xmlCodeElement.textContent = xml;
+    }
+    
+    // Example usage: call the updateXmlCode function with the generated XML
+    var generatedXml = '<?xml version="1.0" encoding="UTF-8"?><root><child>Hello, World!</child></root>';
+    updateXmlCode(generatedXml);
+  </script>
+</body>
+</html>
+
 
