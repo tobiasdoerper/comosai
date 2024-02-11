@@ -7,32 +7,44 @@
   <title>COMOS AI BY SIEMENS</title>
   <script type="module" crossorigin src="/assets/index-c8bc2c87.js"></script>
   <link rel="stylesheet" href="/assets/index-5e49c158.css">
+  <style>
+    /* CSS styles for XML display */
+    #xmlDisplayContainer {
+      background-color: black;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      overflow-x: auto; /* Enable horizontal scrolling if needed */
+    }
+  </style>
 </head>
 <body>
   <div id="root"></div>
   
   <script>
-    // Function to check if a string is valid XML
-    function isValidXml(str) {
-      // Attempt to parse the string as XML
-      try {
-        new DOMParser().parseFromString(str, 'text/xml');
-        return true;
-      } catch (error) {
-        return false;
-      }
-    }
-
     // Function to process AI response and update UI
     function processAiResponse(response) {
       // Check if the response contains XML content
-      if (isValidXml(response)) {
-        // If it does, update the UI to display the XML content
-        updateXmlDisplay(response);
+      if (response.includes('<?xml')) {
+        // If it does, extract the XML portion
+        var xmlContent = extractXmlContent(response);
+        // Update the UI to display the XML content
+        updateXmlDisplay(xmlContent);
       } else {
         // If not, update the UI to display the regular response
         updateRegularDisplay(response);
       }
+    }
+
+    // Function to extract XML content from response
+    function extractXmlContent(response) {
+      // Find the start and end positions of the XML content
+      var startIndex = response.indexOf('<?xml');
+      var endIndex = response.indexOf('</root>') + '</root>'.length;
+      // Extract the XML content
+      var xmlContent = response.substring(startIndex, endIndex);
+      return xmlContent;
     }
 
     // Function to update UI with regular response
@@ -43,16 +55,23 @@
 
     // Function to update UI with XML content
     function updateXmlDisplay(xml) {
-      // Update the UI to display the XML content
-      // For example, create a separate section to display the XML
+      // Get the container for XML display
+      var xmlDisplayContainer = document.getElementById('xmlDisplayContainer');
+      // Set the XML content inside a preformatted text element
+      xmlDisplayContainer.innerHTML = '<pre>' + xml + '</pre>';
     }
 
     // Example usage: Call processAiResponse with the AI-generated response
-    var aiResponse = '<?xml version="1.0" encoding="UTF-8"?><root><child>Hello, World!</child></root>';
+    var aiResponse = `Certainly! Below is an example of an XML code snippet that you could use to import a new object into COMOS. Please note that this is a hypothetical example and the actual values and structure may vary depending on your specific COMOS configuration and version.
+
+    <!-- The AI response with XML content continues... -->
+
+    `;
     processAiResponse(aiResponse);
   </script>
 </body>
 </html>
+
 
 
 
