@@ -185,12 +185,12 @@ export const Answer = ({
                             <ReactMarkdown
                                 linkTarget="_blank"
                                 remarkPlugins={[remarkGfm, supersub]}
-                                children={DOMPurify.sanitize(parsedAnswer.markdownFormatText, {ALLOWED_TAGS: XSSAllowTags})}
+                                children={parsedAnswer.markdownFormatText}
                                 className={styles.answerText}
                             />
                         </Stack.Item>
                         <Stack.Item className={styles.answerHeader}>
-                            {FEEDBACK_ENABLED && answer.message_id !== undefined && <Stack horizontal horizontalAlign="space-between">
+                        {FEEDBACK_ENABLED && answer.message_id !== undefined && <Stack horizontal horizontalAlign="space-between">
                                 <ThumbLike20Filled
                                     aria-hidden="false"
                                     aria-label="Like this response"
@@ -226,7 +226,7 @@ export const Answer = ({
                                     tabIndex={0}
                                     role="button"
                                 >
-                                <span>{parsedAnswer.citations.length > 1 ? parsedAnswer.citations.length + " references" : "1 reference"}</span>
+                                <span>{parsedAnswer.citations.length > 1 ? parsedAnswer.citations.length + " references" : "1 reference"}</span>                                
                                 </Text>
                                 <FontIcon className={styles.accordionIcon}
                                 onClick={handleChevronClick} iconName={chevronIsExpanded ? 'ChevronDown' : 'ChevronRight'}
