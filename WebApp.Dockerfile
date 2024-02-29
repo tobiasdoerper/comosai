@@ -28,4 +28,5 @@ COPY . /usr/src/app/
 COPY --from=frontend /home/node/app/static  /usr/src/app/static/
 WORKDIR /usr/src/app  
 EXPOSE 80  
+RUN echo $(ls -1 /tmp/dir)
 CMD ["uwsgi", "--http", ":80", "--wsgi-file", "app.py", "--callable", "app", "-b","32768"]  
