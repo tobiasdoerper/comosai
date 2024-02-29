@@ -67,4 +67,4 @@ jobs:
           app-name: 'app-aifordipaswidser-00'
           slot-name: 'Production'
            
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_909fbfce-6fc8-45f3-89a1-94a14bfaa7d4}}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_71224E856DC94B91AA7A67A6F6EF2C32 }}
