@@ -593,7 +593,7 @@ const Chat = () => {
                                     aria-hidden="true"
                                 />
                                 <h1 className={styles.chatEmptyStateTitle}> Need Help? </h1>
-                                <h2 className={styles.chatEmptyStateSubtitle}> This is a COMOS expert Chatbot, consider me as your new colleague! </h2>
+                                <h2 className={styles.chatEmptyStateSubtitle}> This is a COMOS expert, consider as your new colleague at SIEMENS DI PA SW, let's talk! </h2>
                             </Stack>
                         ) : (
                             <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px" }} role="log">
