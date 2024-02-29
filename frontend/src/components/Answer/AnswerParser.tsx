@@ -12,7 +12,7 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
     const citationLinks = answerText.match(/\[(doc\d\d?\d?)]/g);
 
     const lengthDocN = "[doc".length;
-
+    console.log('before', answerText);
     let filteredCitations = [] as Citation[];
     let citationReindex = 0;
     citationLinks?.forEach(link => {
@@ -27,7 +27,7 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
         }
     })
 
-
+    console.log('after', answerText);
     return {
         citations: filteredCitations,
         markdownFormatText: answerText
