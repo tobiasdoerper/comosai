@@ -11,8 +11,7 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
     let answerText = answer.answer;
     const citationLinks = answerText.match(/\[(doc\d\d?\d?)]/g);
 
-    const lengthDocN = "[doc".length;
-    console.log('before', answerText);
+    const lengthDocN = "[doc".length;    
     let filteredCitations = [] as Citation[];
     let citationReindex = 0;
     citationLinks?.forEach(link => {
@@ -25,9 +24,7 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
           citation.reindex_id = citationReindex.toString(); // reindex from 1 for display
           filteredCitations.push(citation);
         }
-    })
-
-    console.log('after', answerText);
+    })    
     return {
         citations: filteredCitations,
         markdownFormatText: answerText
