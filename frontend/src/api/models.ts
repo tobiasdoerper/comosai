@@ -120,5 +120,6 @@ export enum Feedback {
     OtherHarmful = "other_harmlful",
     Efficient="efficient",
     Exact="exact",
-    Creative="creative"   
+    Creative="creative",
+    SolvedProblem="solved_problem"
 }

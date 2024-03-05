@@ -203,6 +203,7 @@ export const Answer = ({
             <div>Why was this response helpful?</div>
             <Stack tokens={{ childrenGap: 4 }}>
                 <Checkbox label="Efficient response" id={Feedback.Efficient} defaultChecked={positiveFeedbackList.includes(Feedback.Efficient)} onChange={updatePositiveFeedbackList}></Checkbox>
+                <Checkbox label="It help me to solve a problem" id={Feedback.SolvedProblem} defaultChecked={positiveFeedbackList.includes(Feedback.SolvedProblem)} onChange={updatePositiveFeedbackList}></Checkbox>
                 <Checkbox label="Exact response" id={Feedback.Exact} defaultChecked={positiveFeedbackList.includes(Feedback.Exact)} onChange={updatePositiveFeedbackList}></Checkbox>
                 <Checkbox label="The response was creative" id={Feedback.Creative} defaultChecked={positiveFeedbackList.includes(Feedback.Creative)} onChange={updatePositiveFeedbackList}></Checkbox>
                 <Checkbox label="Other" id={Feedback.OtherHelpful} defaultChecked={positiveFeedbackList.includes(Feedback.OtherHelpful)} onChange={updatePositiveFeedbackList}></Checkbox>
