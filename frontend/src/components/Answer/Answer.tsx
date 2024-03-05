@@ -38,8 +38,10 @@ export const Answer = ({
     const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen);
     const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer));
     const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
+    const [isPositiveFeedbackDialogOpen, setIsPositiveFeedbackDialogOpen] = useState(false);
     const [showReportInappropriateFeedback, setShowReportInappropriateFeedback] = useState(false);
     const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([]);
+    const [positiveFeedbackList, setPositiveFeedbackList] = useState<Feedback[]>([]);
     const appStateContext = useContext(AppStateContext)
     const FEEDBACK_ENABLED = appStateContext?.state.frontendSettings?.feedback_enabled;
 
@@ -95,6 +97,7 @@ export const Answer = ({
         }
         else {
             newFeedbackState = Feedback.Positive;
+            setIsPositiveFeedbackDialogOpen(true);
         }
         appStateContext?.dispatch({ type: 'SET_FEEDBACK_STATE', payload: { answerId: answer.message_id, feedback: newFeedbackState } });
         setFeedbackState(newFeedbackState);
@@ -134,6 +137,20 @@ export const Answer = ({
         setNegativeFeedbackList(feedbackList);
     };
 
+    const updatePositiveFeedbackList = (ev?: FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
+        if (answer.message_id == undefined) return;
+        let selectedFeedback = (ev?.target as HTMLInputElement)?.id as Feedback;
+
+        let feedbackList = negativeFeedbackList.slice();
+        if (checked) {
+            feedbackList.push(selectedFeedback);
+        } else {
+            feedbackList = feedbackList.filter((f) => f !== selectedFeedback);
+        }
+
+        setPositiveFeedbackList(feedbackList);
+    };
+
     const onSubmitNegativeFeedback = async () => {
         if (answer.message_id == undefined) return;
         if (answer.feedback_content && answer.feedback_content !== "") {
@@ -145,12 +162,25 @@ export const Answer = ({
         resetFeedbackDialog();
     }
 
+    const onSubmitPositiveFeedback = async () => {
+        if (answer.message_id == undefined) return;
+        if (answer.feedback_content && answer.feedback_content !== "") {
+            await historyMessageFeedback(answer.message_id, positiveFeedbackList.join(","), answer.feedback_content);            
+        }
+        else {            
+            await historyMessageFeedback(answer.message_id, positiveFeedbackList.join(","), "");
+        }
+        resetFeedbackDialog();
+    }
+
     const resetFeedbackDialog = () => {
         setIsFeedbackDialogOpen(false);
         setShowReportInappropriateFeedback(false);
+        setIsPositiveFeedbackDialogOpen(false);
         setNegativeFeedbackList([]);
+        setPositiveFeedbackList([]);
     }
-    const onChangeUserFeedback = (event:any) => {        
+    const onChangeUserFeedback = (event: any) => {
         answer.feedback_content = event.target.value
     }
     const UnhelpfulFeedbackContent = () => {
@@ -162,12 +192,24 @@ export const Answer = ({
                 <Checkbox label="The response is not from my data" id={Feedback.OutOfScope} defaultChecked={negativeFeedbackList.includes(Feedback.OutOfScope)} onChange={updateFeedbackList}></Checkbox>
                 <Checkbox label="Inaccurate or irrelevant" id={Feedback.InaccurateOrIrrelevant} defaultChecked={negativeFeedbackList.includes(Feedback.InaccurateOrIrrelevant)} onChange={updateFeedbackList}></Checkbox>
                 <Checkbox label="Other" id={Feedback.OtherUnhelpful} defaultChecked={negativeFeedbackList.includes(Feedback.OtherUnhelpful)} onChange={updateFeedbackList}></Checkbox>
-                <TextField id="feedback_content_box" label="User Feedback" multiline value={answer.feedback_content} placeholder="Write specific feedback.." onChange={onChangeUserFeedback} />
+                <TextField id="feedback_content_box" label="User Feedback" multiline value={answer.feedback_content} placeholder="Write your own feedback.." onChange={onChangeUserFeedback} />
             </Stack>
             <div onClick={() => setShowReportInappropriateFeedback(true)} style={{ color: "#115EA3", cursor: "pointer" }}>Report inappropriate content</div>
         </>);
     }
 
+    const HelpfulFeedbackContent = () => {
+        return (<>
+            <div>Why was this response helpful?</div>
+            <Stack tokens={{ childrenGap: 4 }}>
+                <Checkbox label="Efficient response" id={Feedback.Efficient} defaultChecked={positiveFeedbackList.includes(Feedback.Efficient)} onChange={updatePositiveFeedbackList}></Checkbox>
+                <Checkbox label="Exact response" id={Feedback.Exact} defaultChecked={positiveFeedbackList.includes(Feedback.Exact)} onChange={updatePositiveFeedbackList}></Checkbox>
+                <Checkbox label="The response was creative" id={Feedback.Creative} defaultChecked={positiveFeedbackList.includes(Feedback.Creative)} onChange={updatePositiveFeedbackList}></Checkbox>
+                <Checkbox label="Other" id={Feedback.OtherHelpful} defaultChecked={positiveFeedbackList.includes(Feedback.OtherHelpful)} onChange={updatePositiveFeedbackList}></Checkbox>
+                <TextField id="feedback_content_box" label="User Feedback" multiline value={answer.feedback_content} placeholder="Write your own feedback.." onChange={onChangeUserFeedback} />
+            </Stack>
+        </>);
+    }
     const ReportInappropriateFeedbackContent = () => {
         return (
             <>
@@ -291,7 +333,7 @@ export const Answer = ({
                     }]
                 }}
                 dialogContentProps={{
-                    title: "Submit Feedback",
+                    title: "Negative Feedback",
                     showCloseButton: true
                 }}
             >
@@ -303,6 +345,43 @@ export const Answer = ({
                     <div>By pressing submit, your feedback will be visible to the application owner.</div>
 
                     <DefaultButton disabled={negativeFeedbackList.length < 1} onClick={onSubmitNegativeFeedback}>Submit</DefaultButton>
+                </Stack>
+
+            </Dialog>
+            <Dialog
+                onDismiss={() => {
+                    resetFeedbackDialog();
+                    setFeedbackState(Feedback.Neutral);
+                }}
+                hidden={!isPositiveFeedbackDialogOpen}
+                styles={{
+
+                    main: [{
+                        selectors: {
+                            ['@media (min-width: 480px)']: {
+                                maxWidth: '600px',
+                                background: "#FFFFFF",
+                                boxShadow: "0px 14px 28.8px rgba(0, 0, 0, 0.24), 0px 0px 8px rgba(0, 0, 0, 0.2)",
+                                borderRadius: "8px",
+                                maxHeight: '600px',
+                                minHeight: '100px',
+                            }
+                        }
+                    }]
+                }}
+                dialogContentProps={{
+                    title: "Positive Feedback",
+                    showCloseButton: true
+                }}
+            >
+                <Stack tokens={{ childrenGap: 4 }}>
+                    <div>Your feedback will improve this experience.</div>
+
+                    <HelpfulFeedbackContent />
+
+                    <div>By pressing submit, your feedback will be visible to the application owner.</div>
+
+                    <DefaultButton disabled={positiveFeedbackList.length < 1} onClick={onSubmitPositiveFeedback}>Submit</DefaultButton>
                 </Stack>
 
             </Dialog>

@@ -112,9 +112,13 @@ export enum Feedback {
     OutOfScope = "out_of_scope",
     InaccurateOrIrrelevant = "inaccurate_or_irrelevant",
     OtherUnhelpful = "other_unhelpful",
+    OtherHelpful = "other_helpful",
     HateSpeech = "hate_speech",
     Violent = "violent",
     Sexual = "sexual",
     Manipulative = "manipulative",
-    OtherHarmful = "other_harmlful"
+    OtherHarmful = "other_harmlful",
+    Efficient="efficient",
+    Exact="exact",
+    Creative="creative"   
 }
