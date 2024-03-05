@@ -4,6 +4,7 @@ export type AskResponse = {
     error?: string;
     message_id?: string;
     feedback?: Feedback;
+    feedback_content?:string
 };
 
 export type Citation = {

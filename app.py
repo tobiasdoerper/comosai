@@ -715,6 +715,7 @@ def update_message():
     ## check request for message_id
     message_id = request.json.get("message_id", None)
     message_feedback = request.json.get("message_feedback", None)
+    message_feedback_content = request.json.get("message_feedback_content", None)
     try:
         if not message_id:
             return jsonify({"error": "message_id is required"}), 400
@@ -722,10 +723,12 @@ def update_message():
         if not message_feedback:
             return jsonify({"error": "message_feedback is required"}), 400
         
+        if not message_feedback_content:
+            message_feedback_content = ""
         ## update the message in cosmos
-        updated_message = cosmos_conversation_client.update_message_feedback(user_id, message_id, message_feedback)
+        updated_message = cosmos_conversation_client.update_message_feedback(user_id, message_id, message_feedback, message_feedback_content)
         if updated_message:
-            return jsonify({"message": f"Successfully updated message with feedback {message_feedback}", "message_id": message_id}), 200
+            return jsonify({"message": f"Successfully updated message with feedback {message_feedback} and feedback conent {message_feedback_content}", "message_id": message_id}), 200
         else:
             return jsonify({"error": f"Unable to update message {message_id}. It either does not exist or the user does not have access to it."}), 404
         

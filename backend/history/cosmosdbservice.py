@@ -137,10 +137,11 @@ class CosmosConversationClient():
         else:
             return False
     
-    def update_message_feedback(self, user_id, message_id, feedback):
+    def update_message_feedback(self, user_id, message_id, feedback, feedback_content):
         message = self.container_client.read_item(item=message_id, partition_key=user_id)
         if message:
             message['feedback'] = feedback
+            message['feedback_content'] = feedback_content
             resp = self.container_client.upsert_item(message)
             return resp
         else:
