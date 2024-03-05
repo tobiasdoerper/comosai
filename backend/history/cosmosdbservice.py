@@ -30,15 +30,17 @@ class CosmosConversationClient():
         except:
             return False
 
-    def create_conversation(self, user_id, title = ''):
+    def create_conversation(self, user_id, username, title = ''):
         conversation = {
             'id': str(uuid.uuid4()),  
             'type': 'conversation',
             'createdAt': datetime.utcnow().isoformat(),  
             'updatedAt': datetime.utcnow().isoformat(),  
             'userId': user_id,
+            'username':username,
             'title': title
         }
+    
         ## TODO: add some error handling based on the output of the upsert_item call
         resp = self.container_client.upsert_item(conversation)  
         if resp:

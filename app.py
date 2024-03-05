@@ -618,6 +618,7 @@ def add_conversation():
     message_uuid = str(uuid.uuid4())
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user['user_principal_id']
+    user_name = authenticated_user['user_name']
 
     ## check request for conversation_id
     conversation_id = request.json.get("conversation_id", None)
@@ -631,7 +632,7 @@ def add_conversation():
         history_metadata = {}
         if not conversation_id:
             title = generate_title(request.json["messages"])
-            conversation_dict = cosmos_conversation_client.create_conversation(user_id=user_id, title=title)
+            conversation_dict = cosmos_conversation_client.create_conversation(user_id=user_id,title=title,username=user_name)
             conversation_id = conversation_dict['id']
             history_metadata['title'] = title
             history_metadata['date'] = conversation_dict['createdAt']
