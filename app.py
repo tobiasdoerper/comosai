@@ -643,6 +643,7 @@ def add_conversation():
         if len(messages) > 0 and messages[-1]['role'] == "user":
             cosmos_conversation_client.create_message(
                 uuid=str(uuid.uuid4()),
+                username=user_name,
                 conversation_id=conversation_id,
                 user_id=user_id,
                 input_message=messages[-1]
@@ -665,6 +666,7 @@ def add_conversation():
 def update_conversation():
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user['user_principal_id']
+    user_name = authenticated_user['user_name']
 
     ## check request for conversation_id
     conversation_id = request.json.get("conversation_id", None)
@@ -687,6 +689,7 @@ def update_conversation():
                 cosmos_conversation_client.create_message(
                     uuid=str(uuid.uuid4()),
                     conversation_id=conversation_id,
+                    username=user_name,
                     user_id=user_id,
                     input_message=messages[-2]
                 )
@@ -694,6 +697,7 @@ def update_conversation():
             cosmos_conversation_client.create_message(
                 uuid=message_uuid,
                 conversation_id=conversation_id,
+                username=user_name,
                 user_id=user_id,
                 input_message=messages[-1]
             )
