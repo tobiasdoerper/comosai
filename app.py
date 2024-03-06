@@ -615,14 +615,14 @@ def conversation_internal(request_body):
 @app.route("/history/generate", methods=["POST"])
 def add_conversation():
     global message_uuid
-    message_uuid = str(uuid.uuid4())
+    message_uuid = str(uuid.uuid4())    
+
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user['user_principal_id']
     user_name = authenticated_user['user_name']
 
     ## check request for conversation_id
-    conversation_id = request.json.get("conversation_id", None)
-
+    conversation_id = request.json.get("conversation_id", None)  
     try:
         # make sure cosmos is configured
         if not cosmos_conversation_client:
@@ -641,11 +641,13 @@ def add_conversation():
         ## then write it to the conversation history in cosmos
         messages = request.json["messages"]
         if len(messages) > 0 and messages[-1]['role'] == "user":
+            global messageID
+            messageID = str(uuid.uuid4())
             cosmos_conversation_client.create_message(
-                uuid=str(uuid.uuid4()),
+                uuid=messageID,
                 username=user_name,
                 conversation_id=conversation_id,
-                user_id=user_id,
+                user_id=user_id,                
                 input_message=messages[-1]
             )
         else:
@@ -699,6 +701,7 @@ def update_conversation():
                 conversation_id=conversation_id,
                 username=user_name,
                 user_id=user_id,
+                question_id=messageID,
                 input_message=messages[-1]
             )
         else:

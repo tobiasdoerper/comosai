@@ -114,18 +114,32 @@ class CosmosConversationClient():
         else:
             return conversation[0]
  
-    def create_message(self, uuid, conversation_id,username, user_id, input_message: dict):
-        message = {
-            'id': uuid,
-            'type': 'message',
-            'userId' : user_id,
-            'createdAt': datetime.utcnow().isoformat(),
-            'updatedAt': datetime.utcnow().isoformat(),
-            'conversationId' : conversation_id,
-            'username':username,
-            'role': input_message['role'],
-            'content': input_message['content']
-        }
+    def create_message(self, uuid, conversation_id,username, user_id, input_message: dict, question_id=""):
+        if len(question_id) == 0:
+            message = {
+                'id': uuid,
+                'type': 'message',
+                'userId' : user_id,
+                'createdAt': datetime.utcnow().isoformat(),
+                'updatedAt': datetime.utcnow().isoformat(),
+                'conversationId' : conversation_id,
+                'username':username,
+                'role': input_message['role'],
+                'content': input_message['content']
+            }
+        else: 
+            message = {
+                'id': uuid,
+                'type': 'message',
+                'userId' : user_id,
+                'createdAt': datetime.utcnow().isoformat(),
+                'updatedAt': datetime.utcnow().isoformat(),
+                'conversationId' : conversation_id,
+                'questionId':question_id,
+                'username':username,
+                'role': input_message['role'],
+                'content': input_message['content']
+            }
 
         if self.enable_message_feedback:
             message['feedback'] = ''
