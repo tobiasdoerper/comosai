@@ -14,11 +14,11 @@ html {
     font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    animation-duration: 30s;
+    animation-duration: 25s;
     animation-fill-mode: forwards;
     animation-iteration-count: infinite;
     animation-name: farbverlaufAnimation;
-    animation-timing-function: ease;
+    animation-timing-function: ease-in-out;;
     background-size: 200% 200%;
 }
 
@@ -27,7 +27,7 @@ html {
         background-position: 0% 50%;
     }
     50% {
-        background-position: 100% 50%;
+        background-position: 80% 50%;
     }
     100% {
         background-position: 0% 50%;
