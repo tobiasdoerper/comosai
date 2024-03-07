@@ -18,7 +18,7 @@ html {
     animation-fill-mode: forwards;
     animation-iteration-count: infinite;
     animation-name: farbverlaufAnimation;
-    animation-timing-function: ease-in-out;;
+    animation-timing-function: ease-in-out;
     background-size: 200% 200%;
 }
 
@@ -26,12 +26,18 @@ html {
     0% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 80% 50%;
     }
+
     100% {
         background-position: 0% 50%;
     }
+}
+
+a {
+    color: #00E6DC;
 }
 
 
