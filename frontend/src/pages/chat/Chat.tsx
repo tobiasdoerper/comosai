@@ -10,7 +10,8 @@ import { isEmpty } from "lodash-es";
 import DOMPurify from 'dompurify';
 
 import styles from "./Chat.module.css";
-import Contoso from "../../assets/Contoso.svg";
+import Contoso from "../../assets/comos.png";
+import Loading from "../../assets/loading.svg";
 import { XSSAllowTags } from "../../constants/xssAllowTags";
 
 import {
@@ -131,7 +132,18 @@ const Chat = () => {
                 setMessages([...messages, assistantMessage]) :
                 setMessages([...messages, toolMessage, assistantMessage]);
         }
+
     }
+   /* useEffect(() => {
+        document.querySelectorAll('pre code').forEach((block) => {
+            if (!(block as HTMLElement).dataset.highlighted) {
+                // Entfernt das Attribut, wenn es bereits hervorgehoben wurde
+                hljs.highlightAll();
+                //    delete (block as HTMLElement).dataset.highlighted;
+            }
+            //  hljs.highlightElement(block as HTMLElement);
+        });
+    }, [assistantMessage]);*/
 
     const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
         setIsLoading(true);
@@ -566,7 +578,6 @@ const Chat = () => {
     const disabledButton = () => {
         return isLoading || (messages && messages.length === 0) || clearingChat || appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading
     }
-
     return (
         <div className={styles.container} role="main">
             {showAuthMessage ? (
@@ -629,7 +640,7 @@ const Chat = () => {
                                         <div className={styles.chatMessageGpt}>
                                             <Answer
                                                 answer={{
-                                                    answer: "Generating answer...",
+                                                    answer: "Generating answer...",                        
                                                     citations: []
                                                 }}
                                                 onCitationClicked={() => null}
@@ -661,19 +672,20 @@ const Chat = () => {
                                     role="button"
                                     styles={{
                                         icon: {
-                                            color: '#FFFFFF',
+                                            color: '#F3F3F0',
                                         },
                                         iconDisabled: {
                                             color: "#BDBDBD !important"
                                         },
                                         root: {
                                             color: '#FFFFFF',
-                                            background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)"
+                                            background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
                                         },
                                         rootDisabled: {
                                             background: "#F0F0F0"
                                         }
                                     }}
+                                    title="Start a new chat"
                                     className={styles.newChatIcon}
                                     iconProps={{ iconName: 'Add' }}
                                     onClick={newChat}
@@ -684,19 +696,20 @@ const Chat = () => {
                                     role="button"
                                     styles={{
                                         icon: {
-                                            color: '#FFFFFF',
+                                            color: '#F3F3F0',
                                         },
                                         iconDisabled: {
                                             color: "#BDBDBD !important",
                                         },
                                         root: {
                                             color: '#FFFFFF',
-                                            background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",
+                                            background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
                                         },
                                         rootDisabled: {
                                             background: "#F0F0F0"
                                         }
-                                    }}
+                                    }}                        
+                                    title="Clear chat"            
                                     className={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? styles.clearChatBroom : styles.clearChatBroomNoCosmos}
                                     iconProps={{ iconName: 'Broom' }}
                                     onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
@@ -734,7 +747,7 @@ const Chat = () => {
                                 <ReactMarkdown
                                     linkTarget="_blank"
                                     className={styles.citationPanelContent}
-                                    children={DOMPurify.sanitize(activeCitation.content, {ALLOWED_TAGS: XSSAllowTags})}
+                                    children={DOMPurify.sanitize(activeCitation.content, { ALLOWED_TAGS: XSSAllowTags })}
                                     remarkPlugins={[remarkGfm]}
                                     rehypePlugins={[rehypeRaw]}
                                 />

@@ -14,6 +14,8 @@ import remarkGfm from "remark-gfm";
 import supersub from 'remark-supersub'
 import { ThumbDislike20Filled, ThumbLike20Filled } from "@fluentui/react-icons";
 import { XSSAllowTags } from "../../constants/xssAllowTags";
+import Contoso from "../../assets/comos.png";
+
 
 interface Props {
     answer: AskResponse;
@@ -165,9 +167,9 @@ export const Answer = ({
     const onSubmitPositiveFeedback = async () => {
         if (answer.message_id == undefined) return;
         if (answer.feedback_content && answer.feedback_content !== "") {
-            await historyMessageFeedback(answer.message_id, positiveFeedbackList.join(","), answer.feedback_content);            
+            await historyMessageFeedback(answer.message_id, positiveFeedbackList.join(","), answer.feedback_content);
         }
-        else {            
+        else {
             await historyMessageFeedback(answer.message_id, positiveFeedbackList.join(","), "");
         }
         resetFeedbackDialog();
@@ -228,90 +230,99 @@ export const Answer = ({
 
     return (
         <>
-            <Stack className={styles.answerContainer} tabIndex={0}>
+            <Stack className={styles.messageContainer}>
+                <div className={styles.profileImageContainer}>
+                    <img
+                        className={styles.profileImage}
+                        src={Contoso}
+                        aria-hidden="true"
+                    />
+                </div>
+                <Stack className={styles.answerContainer} tabIndex={0}>
 
-                <Stack.Item>
-                    <Stack horizontal grow>
-                        <Stack.Item grow>
-                            <ReactMarkdown
-                                linkTarget="_blank"
-                                remarkPlugins={[remarkGfm, supersub]}
-                                children={parsedAnswer.markdownFormatText}
-                                className={styles.answerText}
-                            />
-                        </Stack.Item>
-                        <Stack.Item className={styles.answerHeader}>
-                            {FEEDBACK_ENABLED && answer.message_id !== undefined && <Stack horizontal horizontalAlign="space-between">
-                                <ThumbLike20Filled
-                                    aria-hidden="false"
-                                    aria-label="Like this response"
-                                    onClick={() => onLikeResponseClicked()}
-                                    style={feedbackState === Feedback.Positive || appStateContext?.state.feedbackState[answer.message_id] === Feedback.Positive ?
-                                        { color: "darkgreen", cursor: "pointer" } :
-                                        { color: "slategray", cursor: "pointer" }}
+                    <Stack.Item>
+                        <Stack horizontal grow>
+                            <Stack.Item grow>
+                                <ReactMarkdown
+                                    linkTarget="_blank"
+                                    remarkPlugins={[remarkGfm, supersub]}
+                                    children={parsedAnswer.markdownFormatText}
+                                    className={styles.answerText}
                                 />
-                                <ThumbDislike20Filled
-                                    aria-hidden="false"
-                                    aria-label="Dislike this response"
-                                    onClick={() => onDislikeResponseClicked()}
-                                    style={(feedbackState !== Feedback.Positive && feedbackState !== Feedback.Neutral && feedbackState !== undefined) ?
-                                        { color: "darkred", cursor: "pointer" } :
-                                        { color: "slategray", cursor: "pointer" }}
-                                />
-                            </Stack>}
+                            </Stack.Item>
+                            <Stack.Item className={styles.answerHeader}>
+                                {FEEDBACK_ENABLED && answer.message_id !== undefined && <Stack horizontal horizontalAlign="space-between">
+                                    <ThumbLike20Filled
+                                        aria-hidden="false"
+                                        aria-label="Like this response"
+                                        onClick={() => onLikeResponseClicked()}
+                                        style={feedbackState === Feedback.Positive || appStateContext?.state.feedbackState[answer.message_id] === Feedback.Positive ?
+                                            { color: "#00D7A0", cursor: "pointer" } :
+                                            { color: "white", cursor: "pointer" }}
+                                    />
+                                    <ThumbDislike20Filled
+                                        aria-hidden="false"
+                                        aria-label="Dislike this response"
+                                        onClick={() => onDislikeResponseClicked()}
+                                        style={(feedbackState !== Feedback.Positive && feedbackState !== Feedback.Neutral && feedbackState !== undefined) ?
+                                            { color: "#EF0137", cursor: "pointer" } :
+                                            { color: "white", cursor: "pointer" }}
+                                    />
+                                </Stack>}
+                            </Stack.Item>
+                        </Stack>
+
+                    </Stack.Item>
+                    <Stack horizontal className={styles.answerFooter}>
+                        {!!parsedAnswer.citations.length && (
+                            <Stack.Item
+                                onKeyDown={e => e.key === "Enter" || e.key === " " ? toggleIsRefAccordionOpen() : null}
+                            >
+                                <Stack style={{ width: "100%" }} >
+                                    <Stack horizontal horizontalAlign='start' verticalAlign='center'>
+                                        <Text
+                                            className={styles.accordionTitle}
+                                            onClick={toggleIsRefAccordionOpen}
+                                            aria-label="Open references"
+                                            tabIndex={0}
+                                            role="button"
+                                        >
+                                            <span>{parsedAnswer.citations.length > 1 ? parsedAnswer.citations.length + " references" : "1 reference"}</span>
+                                        </Text>
+                                        <FontIcon className={styles.accordionIcon}
+                                            onClick={handleChevronClick} iconName={chevronIsExpanded ? 'ChevronDown' : 'ChevronRight'}
+                                        />
+                                    </Stack>
+
+                                </Stack>
+                            </Stack.Item>
+                        )}
+                        <Stack.Item className={styles.answerDisclaimerContainer}>
+                            <span className={styles.answerDisclaimer}>AI-generated content may be incorrect</span>
                         </Stack.Item>
                     </Stack>
-
-                </Stack.Item>
-                <Stack horizontal className={styles.answerFooter}>
-                    {!!parsedAnswer.citations.length && (
-                        <Stack.Item
-                            onKeyDown={e => e.key === "Enter" || e.key === " " ? toggleIsRefAccordionOpen() : null}
-                        >
-                            <Stack style={{ width: "100%" }} >
-                                <Stack horizontal horizontalAlign='start' verticalAlign='center'>
-                                    <Text
-                                        className={styles.accordionTitle}
-                                        onClick={toggleIsRefAccordionOpen}
-                                        aria-label="Open references"
+                    {chevronIsExpanded &&
+                        <div style={{ marginTop: 8, display: "flex", flexFlow: "wrap column", maxHeight: "150px", gap: "4px" }}>
+                            {parsedAnswer.citations.map((citation, idx) => {
+                                return (
+                                    <span
+                                        title={createCitationFilepath(citation, ++idx)}
                                         tabIndex={0}
-                                        role="button"
+                                        role="link"
+                                        key={idx}
+                                        onClick={() => onCitationClicked(citation)}
+                                        onKeyDown={e => e.key === "Enter" || e.key === " " ? onCitationClicked(citation) : null}
+                                        className={styles.citationContainer}
+                                        aria-label={createCitationFilepath(citation, idx)}
                                     >
-                                        <span>{parsedAnswer.citations.length > 1 ? parsedAnswer.citations.length + " references" : "1 reference"}</span>
-                                    </Text>
-                                    <FontIcon className={styles.accordionIcon}
-                                        onClick={handleChevronClick} iconName={chevronIsExpanded ? 'ChevronDown' : 'ChevronRight'}
-                                    />
-                                </Stack>
-
-                            </Stack>
-                        </Stack.Item>
-                    )}
-                    <Stack.Item className={styles.answerDisclaimerContainer}>
-                        <span className={styles.answerDisclaimer}>AI-generated content may be incorrect</span>
-                    </Stack.Item>
+                                        <div className={styles.citation}>{idx}</div>
+                                        {createCitationFilepath(citation, idx, true)}
+                                    </span>);
+                            })}
+                        </div>
+                    }
                 </Stack>
-                {chevronIsExpanded &&
-                    <div style={{ marginTop: 8, display: "flex", flexFlow: "wrap column", maxHeight: "150px", gap: "4px" }}>
-                        {parsedAnswer.citations.map((citation, idx) => {
-                            return (
-                                <span
-                                    title={createCitationFilepath(citation, ++idx)}
-                                    tabIndex={0}
-                                    role="link"
-                                    key={idx}
-                                    onClick={() => onCitationClicked(citation)}
-                                    onKeyDown={e => e.key === "Enter" || e.key === " " ? onCitationClicked(citation) : null}
-                                    className={styles.citationContainer}
-                                    aria-label={createCitationFilepath(citation, idx)}
-                                >
-                                    <div className={styles.citation}>{idx}</div>
-                                    {createCitationFilepath(citation, idx, true)}
-                                </span>);
-                        })}
-                    </div>
-                }
-            </Stack>
+            </Stack >
             <Dialog
                 onDismiss={() => {
                     resetFeedbackDialog();

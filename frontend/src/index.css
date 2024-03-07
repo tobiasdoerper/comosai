@@ -10,11 +10,30 @@ body {
 }
 
 html {
-    background: #f2f2f2;
+    background: radial-gradient(102.81% 108.2% at 100.1% 90.19%, #000028 43.63%, #009999 180%, #009999 100%);
     font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    animation-duration: 30s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: farbverlaufAnimation;
+    animation-timing-function: ease;
+    background-size: 200% 200%;
 }
+
+@keyframes farbverlaufAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 
 #root {
     height: 100%;
