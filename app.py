@@ -432,7 +432,7 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
                             })
                             yield format_as_ndjson(response)
     except Exception as e:
-        yield format_as_ndjson({"error" + str(e)})
+        yield format_as_ndjson({"error tobi" + str(e) + str(lineJson)})
 
 def formatApiResponseNoStreaming(rawResponse):
     if 'error' in rawResponse:
@@ -570,7 +570,7 @@ def conversation_without_data(request_body):
         if message:
             messages.append({
                 "role": message["role"] ,
-                "content": message["content"]
+                "content": message["content"][0]["text"]
             })
 
     response = openai.ChatCompletion.create(
