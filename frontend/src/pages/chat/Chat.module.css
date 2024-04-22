@@ -174,15 +174,30 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     left: 7px;
-    top: 13px;
+    top: 40px;
     color: #FFFFFF;
     border-radius: 4px;
     z-index: 1;
 }
 
+.uploadImageIcon {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    left: 7px;
+    top: 0px;
+    color: #FFFFFF;
+    border-radius: 4px;
+    z-index: 1;
+}
 .clearChatBroomNoCosmos {
     box-sizing: border-box;
     display: flex;
@@ -190,10 +205,10 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     left: 7px;
-    top: 66px;
+    top: 80px;
     color: #FFFFFF;
     border-radius: 4px;
     z-index: 1;
@@ -206,10 +221,10 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     left: 7px;
-    top: 66px;
+    top: 80px;
     color: #FFFFFF;
     border-radius: 4px;
     z-index: 1;

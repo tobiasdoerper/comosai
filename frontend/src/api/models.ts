@@ -4,7 +4,7 @@ export type AskResponse = {
     error?: string;
     message_id?: string;
     feedback?: Feedback;
-    feedback_content?:string
+    feedback_content?: string
 };
 
 export type Citation = {
@@ -30,6 +30,7 @@ export type ChatMessage = {
     end_turn?: boolean;
     date: string;
     feedback?: Feedback;
+    image_url?: string;
 };
 
 export type Conversation = {
@@ -118,8 +119,8 @@ export enum Feedback {
     Sexual = "sexual",
     Manipulative = "manipulative",
     OtherHarmful = "other_harmlful",
-    Efficient="efficient",
-    Exact="exact",
-    Creative="creative",
-    SolvedProblem="solved_problem"
+    Efficient = "efficient",
+    Exact = "exact",
+    Creative = "creative",
+    SolvedProblem = "solved_problem"
 }

@@ -7,12 +7,13 @@ import styles from "./QuestionInput.module.css";
 interface Props {
     onSend: (question: string, id?: string) => void;
     disabled: boolean;
+    images: File[];
     placeholder?: string;
     clearOnSend?: boolean;
     conversationId?: string;
 }
 
-export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conversationId }: Props) => {
+export const QuestionInput = ({ onSend, images, disabled, placeholder, clearOnSend, conversationId }: Props) => {
     const [question, setQuestion] = useState<string>("");
 
     const sendQuestion = () => {
@@ -20,9 +21,9 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
             return;
         }
 
-        if(conversationId){
+        if (conversationId) {
             onSend(question, conversationId);
-        }else{
+        } else {
             onSend(question);
         }
 
@@ -31,6 +32,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
         }
     };
 
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const onEnterPress = (ev: React.KeyboardEvent<Element>) => {
         if (ev.key === "Enter" && !ev.shiftKey) {
             ev.preventDefault();
@@ -46,6 +48,13 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
 
     return (
         <Stack horizontal className={styles.questionInputContainer}>
+            <div className={styles.questionImageContainer} style={{ display: images.length > 0 ? 'block' : 'none' }}>
+                {images.map((file, index) => (
+                    <div key={index}>
+                        <img className={styles.imageContainer} src={URL.createObjectURL(file)} alt={`file-${index}`} />
+                    </div>
+                ))}
+            </div>
             <TextField
                 className={styles.questionInputTextArea}
                 placeholder={placeholder}
@@ -56,17 +65,17 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
                 onChange={onQuestionChange}
                 onKeyDown={onEnterPress}
             />
-            <div className={styles.questionInputSendButtonContainer} 
-                role="button" 
+            <div className={styles.questionInputSendButtonContainer}
+                role="button"
                 tabIndex={0}
                 aria-label="Ask question button"
                 onClick={sendQuestion}
                 onKeyDown={e => e.key === "Enter" || e.key === " " ? sendQuestion() : null}
             >
-                { sendQuestionDisabled ? 
-                    <SendRegular className={styles.questionInputSendButtonDisabled}/>
+                {sendQuestionDisabled ?
+                    <SendRegular className={styles.questionInputSendButtonDisabled} />
                     :
-                    <img src={Send} className={styles.questionInputSendButton}/>
+                    <img src={Send} className={styles.questionInputSendButton} />
                 }
             </div>
             <div className={styles.questionInputBottomBorder} />

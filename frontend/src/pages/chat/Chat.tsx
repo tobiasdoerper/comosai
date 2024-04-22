@@ -6,7 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from "rehype-raw";
 import uuid from 'react-uuid';
-import { isEmpty } from "lodash-es";
+import { compact, isEmpty } from "lodash-es";
 import DOMPurify from 'dompurify';
 
 import styles from "./Chat.module.css";
@@ -56,7 +56,8 @@ const Chat = () => {
     const [processMessages, setProcessMessages] = useState<messageStatus>(messageStatus.NotRunning);
     const [clearingChat, setClearingChat] = useState<boolean>(false);
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
-    const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
+    const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>();
+    const [imageUrl, setImageUrl] = useState<string>('');
 
     const errorDialogContentProps = {
         type: DialogType.close,
@@ -134,27 +135,26 @@ const Chat = () => {
         }
 
     }
-   /* useEffect(() => {
-        document.querySelectorAll('pre code').forEach((block) => {
-            if (!(block as HTMLElement).dataset.highlighted) {
-                // Entfernt das Attribut, wenn es bereits hervorgehoben wurde
-                hljs.highlightAll();
-                //    delete (block as HTMLElement).dataset.highlighted;
-            }
-            //  hljs.highlightElement(block as HTMLElement);
-        });
-    }, [assistantMessage]);*/
-
+    /* useEffect(() => {
+         document.querySelectorAll('pre code').forEach((block) => {
+             if (!(block as HTMLElement).dataset.highlighted) {
+                 // Entfernt das Attribut, wenn es bereits hervorgehoben wurde
+                 hljs.highlightAll();
+                 //    delete (block as HTMLElement).dataset.highlighted;
+             }
+             //  hljs.highlightElement(block as HTMLElement);
+         });
+     }, [assistantMessage]);*/
     const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
         setIsLoading(true);
         setShowLoadingMessage(true);
         const abortController = new AbortController();
-        abortFuncs.current.unshift(abortController);
-
+        abortFuncs.current.unshift(abortController);        
         const userMessage: ChatMessage = {
             id: uuid(),
             role: "user",
             content: question,
+            image_url: imageUrl,
             date: new Date().toISOString(),
         };
 
@@ -185,11 +185,11 @@ const Chat = () => {
         const request: ConversationRequest = {
             messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)]
         };
-
         let result = {} as ChatResponse;
         try {
             const response = await conversationApi(request, abortController.signal);
             if (response?.body) {
+                console.log(response.body);
                 const reader = response.body.getReader();
                 let runningText = "";
 
@@ -469,6 +469,25 @@ const Chat = () => {
         }
         setClearingChat(false)
     };
+    const inputFile = useRef<HTMLInputElement | null>(null);
+    const uploadImage = () => {
+        inputFile.current!.click();
+    };
+    const files: File[] = [];
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            setSelectedFiles(Array.from(event.target.files));
+            const reader = new FileReader();
+            const file = event.target.files[0];
+            reader.onloadend = () => {
+                const base64data = reader.result as string;
+                const mimeType = file.type || 'application/octet-stream';
+                setImageUrl(`data:${mimeType};base64,${base64data.split(',')[1]}`)
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const newChat = () => {
         setProcessMessages(messageStatus.Processing)
@@ -562,6 +581,27 @@ const Chat = () => {
         }
     };
 
+    const handlePaste = (event: any) => {
+        // Überprüfen, ob ein Bild im Clipboard ist
+        if (event.clipboardData.files) {
+            setSelectedFiles(Array.from(event.clipboardData.files));
+            const reader = new FileReader();
+            const file = event.clipboardData.files[0];
+            reader.onloadend = () => {
+                const base64data = reader.result as string;
+                const mimeType = file.type || 'application/octet-stream';
+                setImageUrl(`data:${mimeType};base64,${base64data.split(',')[1]}`)
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const resetImages = () => {
+        setSelectedFiles([]);
+        setImageUrl("");
+    }
+
+
     const parseCitationFromMessage = (message: ChatMessage) => {
         if (message?.role && message?.role === "tool") {
             try {
@@ -595,7 +635,7 @@ const Chat = () => {
                 </Stack>
             ) : (
                 <Stack horizontal className={styles.chatRoot}>
-                    <div className={styles.chatContainer}>
+                    <div className={styles.chatContainer} onPaste={handlePaste}>
                         {!messages || messages.length < 1 ? (
                             <Stack className={styles.chatEmptyState}>
                                 <img
@@ -640,7 +680,7 @@ const Chat = () => {
                                         <div className={styles.chatMessageGpt}>
                                             <Answer
                                                 answer={{
-                                                    answer: "Generating answer...",                        
+                                                    answer: "Generating answer...",
                                                     citations: []
                                                 }}
                                                 onCitationClicked={() => null}
@@ -708,14 +748,39 @@ const Chat = () => {
                                         rootDisabled: {
                                             background: "#F0F0F0"
                                         }
-                                    }}                        
-                                    title="Clear chat"            
+                                    }}
+                                    title="Clear chat"
                                     className={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? styles.clearChatBroom : styles.clearChatBroomNoCosmos}
                                     iconProps={{ iconName: 'Broom' }}
                                     onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
                                     disabled={disabledButton()}
                                     aria-label="clear chat button"
                                 />
+                                <CommandBarButton
+                                    role="button"
+                                    styles={{
+                                        icon: {
+                                            color: '#F3F3F0',
+                                        },
+                                        iconDisabled: {
+                                            color: "#BDBDBD !important",
+                                        },
+                                        root: {
+                                            color: '#FFFFFF',
+                                            background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
+                                        },
+                                        rootDisabled: {
+                                            background: "#F0F0F0"
+                                        }
+                                    }}
+                                    title={selectedFiles.length === 0 ? "Upload Image" : "Remove Image"}
+                                    className={styles.uploadImageIcon}
+                                    iconProps={{ iconName: selectedFiles.length === 0 ? 'ImageSearch' : 'Delete' }}
+                                    aria-label="Upload Image"
+                                    disabled={isLoading}
+                                    onClick={selectedFiles.length === 0 ? uploadImage : resetImages}
+                                />
+                                <input type='file' id='file' ref={inputFile} accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
                                 <Dialog
                                     hidden={hideErrorDialog}
                                     onDismiss={handleErrorDialogClose}
@@ -728,6 +793,7 @@ const Chat = () => {
                                 clearOnSend
                                 placeholder="Type a new question..."
                                 disabled={isLoading}
+                                images={selectedFiles}
                                 onSend={(question, id) => {
                                     appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? makeApiRequestWithCosmosDB(question, id) : makeApiRequestWithoutCosmosDB(question, id)
                                 }}
