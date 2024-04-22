@@ -712,7 +712,7 @@ def add_conversation():
         # check for the conversation_id, if the conversation is not set, we will create a new one
         history_metadata = {}
         if not conversation_id:
-            title = generate_title(request.json["messages"])
+            title = generate_title(request.json["messages"][0].text)
             conversation_dict = cosmos_conversation_client.create_conversation(user_id=user_id,title=title,username=user_name)
             conversation_id = conversation_dict['id']
             history_metadata['title'] = title
