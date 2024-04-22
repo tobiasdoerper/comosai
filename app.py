@@ -6,12 +6,15 @@ import openai
 import copy
 import uuid
 from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, generate_blob_sas, BlobSasPermissions
 from base64 import b64encode
 from flask import Flask, Response, request, jsonify, send_from_directory
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 from backend.auth.auth_utils import get_authenticated_user_details
 from backend.history.cosmosdbservice import CosmosConversationClient
+from werkzeug.utils import secure_filename
 
 load_dotenv()
 
@@ -90,6 +93,12 @@ AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_V
 AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN")
 AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS")
 
+# Upload Images
+AZURE_IMAGE_BLOBSTORAGE_NAME = os.environ.get("AZURE_IMAGE_BLOBSTORAGE_NAME")
+AZURE_UPLOAD_IMAGE_ALLOWED = os.environ.get("AZURE_UPLOAD_IMAGE_ALLOWED")
+AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING = os.environ.get("AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING")
+AZURE_ACCOUNT_NAME = os.environ.get("AZURE_ACCOUNT_NAME")
+AZURE_ACCOUNT_KEY = os.environ.get("AZURE_ACCOUNT_KEY")
 
 SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
@@ -120,6 +129,7 @@ AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower() == "true"
 frontend_settings = { 
     "auth_enabled": AUTH_ENABLED, 
     "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and AZURE_COSMOSDB_DATABASE not in [None, ""],
+    "image_upload_enabled": AZURE_IMAGE_BLOBSTORAGE_NAME and AZURE_UPLOAD_IMAGE_ALLOWED and AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING and AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY not in [None, ""],
 }
 
 message_uuid = ""
@@ -594,6 +604,77 @@ def conversation_without_data(request_body):
     else:
         return Response(stream_without_data(response, history_metadata), mimetype='text/event-stream')
 
+@app.route("/upload/image",  methods=["POST"])
+def upload_image():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file and allowed_file(file.filename):                
+        temp_dir = 'temporary'
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir) 
+        extension = os.path.splitext(file.filename)[1]
+        id = str(uuid.uuid4())
+        guid_filename = id + extension
+        file_path = os.path.join(temp_dir, guid_filename)
+        file.save(file_path)
+        
+        # Hochladen der Datei nach Azure Blob Storage
+        blob_service_client = BlobServiceClient.from_connection_string(AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING)
+        blob_client = blob_service_client.get_blob_client(container=AZURE_IMAGE_BLOBSTORAGE_NAME, blob=guid_filename)
+        with open(file_path, "rb") as data:
+            blob_client.upload_blob(data, overwrite=True)
+        os.remove(file_path)  # Löschen der temporär gespeicherten Datei
+        return jsonify({"message": "File uploaded successfully to Azure Storage", "file_name": guid_filename,"file_id": id ,"sas_url": download_image_internal(guid_filename)}), 200
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
+@app.route("/download/image/<filename>", methods=["GET"])
+def download_image(filename):    
+    try:
+        blob_url = download_image_internal(filename)
+        return jsonify({"sas_url": blob_url}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/delete/image/<filename>", methods=["GET"])
+def delete_image(filename):    
+    try:
+        blob_deletion_status = delete_image_internal(filename)
+        return jsonify({"deletion": blob_deletion_status}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+def delete_image_internal(filename):
+    try:
+        # Erstellen des Blob Service Client
+        blob_service_client = BlobServiceClient.from_connection_string(AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING)
+        
+        # Erstellen des Blob Client für den spezifischen Blob
+        blob_client = blob_service_client.get_blob_client(container=AZURE_IMAGE_BLOBSTORAGE_NAME, blob=filename)
+        
+        # Löschen des Blobs
+        blob_client.delete_blob()
+        return True
+    except Exception as e:
+        print("Ein Fehler ist aufgetreten:", e)
+        return False
+
+def download_image_internal(filename):        
+    sas_token = generate_blob_sas(
+        account_name=AZURE_ACCOUNT_NAME,
+        container_name=AZURE_IMAGE_BLOBSTORAGE_NAME,
+        blob_name=filename,        
+        account_key=AZURE_ACCOUNT_KEY,
+        permission=BlobSasPermissions(read=True),
+        expiry=datetime.utcnow() + timedelta(hours=1)  # Token gültig für 1 Stunde
+    )
+    blob_url = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_IMAGE_BLOBSTORAGE_NAME}/{filename}?{sas_token}"
+    return blob_url
+ 
 
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():

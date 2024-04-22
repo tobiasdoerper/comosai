@@ -125,7 +125,8 @@ class CosmosConversationClient():
                 'conversationId' : conversation_id,
                 'username':username,
                 'role': input_message['role'],
-                'content': input_message['content']
+                'content': input_message['content'],
+                'attachmentId': input_message['attachmentId']
             }
         else: 
             message = {
@@ -138,7 +139,8 @@ class CosmosConversationClient():
                 'questionId':question_id,
                 'username':username,
                 'role': input_message['role'],
-                'content': input_message['content']
+                'content': input_message['content'],
+                'attachmentId': input_message['attachmentId']
             }
 
         if self.enable_message_feedback:

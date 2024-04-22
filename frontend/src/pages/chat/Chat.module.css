@@ -121,8 +121,19 @@
     white-space: pre-wrap;
     word-wrap: break-word;
     max-width: 800px;
-}
+    /*display: grid;   */
 
+}
+.imageContainer{
+    max-width: 200px;
+}
+.chatImageUserMessage{
+    margin-bottom: 10px;
+    flex-direction: column;
+    display: flex;
+    align-items: center; /* Zentriert horizontal */
+    justify-content: center; /* Zentriert vertikal */
+}
 .chatMessageGpt {
     margin-bottom: 12px;
     max-width: 80%;
@@ -251,6 +262,10 @@
     width: 14px;
     height: 14px;
     color: white;
+}
+.imageIcon {
+    width: 24px;
+    height: 24px;
 }
 
 .stopGeneratingText {

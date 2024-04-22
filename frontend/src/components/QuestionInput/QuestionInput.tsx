@@ -3,28 +3,28 @@ import { Stack, TextField } from "@fluentui/react";
 import { SendRegular } from "@fluentui/react-icons";
 import Send from "../../assets/Send.svg";
 import styles from "./QuestionInput.module.css";
+import { BlobImage, ChatMessageContent } from "../../api";
 
 interface Props {
     onSend: (question: string, id?: string) => void;
     disabled: boolean;
-    images: File[];
     placeholder?: string;
     clearOnSend?: boolean;
     conversationId?: string;
 }
 
-export const QuestionInput = ({ onSend, images, disabled, placeholder, clearOnSend, conversationId }: Props) => {
+export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conversationId }: Props) => {
     const [question, setQuestion] = useState<string>("");
 
     const sendQuestion = () => {
-        if (disabled || !question.trim()) {
+        if (disabled || !question.toString().trim()) {
             return;
         }
 
         if (conversationId) {
-            onSend(question, conversationId);
+            onSend(question.toString(), conversationId);
         } else {
-            onSend(question);
+            onSend(question.toString());
         }
 
         if (clearOnSend) {
@@ -44,24 +44,17 @@ export const QuestionInput = ({ onSend, images, disabled, placeholder, clearOnSe
         setQuestion(newValue || "");
     };
 
-    const sendQuestionDisabled = disabled || !question.trim();
+    const sendQuestionDisabled = disabled || !question.toString().trim();
 
     return (
-        <Stack horizontal className={styles.questionInputContainer}>
-            <div className={styles.questionImageContainer} style={{ display: images.length > 0 ? 'block' : 'none' }}>
-                {images.map((file, index) => (
-                    <div key={index}>
-                        <img className={styles.imageContainer} src={URL.createObjectURL(file)} alt={`file-${index}`} />
-                    </div>
-                ))}
-            </div>
+        <Stack horizontal className={styles.questionInputContainer}>                  
             <TextField
                 className={styles.questionInputTextArea}
                 placeholder={placeholder}
                 multiline
                 resizable={false}
                 borderless
-                value={question}
+                value={question.toString()}
                 onChange={onQuestionChange}
                 onKeyDown={onEnterPress}
             />

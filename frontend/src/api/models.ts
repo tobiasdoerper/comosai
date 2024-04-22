@@ -1,3 +1,5 @@
+import { extend } from "lodash";
+
 export type AskResponse = {
     answer: string;
     citations: Citation[];
@@ -26,12 +28,27 @@ export type ToolMessageContent = {
 export type ChatMessage = {
     id: string;
     role: string;
-    content: string;
+    content: string | ChatMessageContent[]; 
     end_turn?: boolean;
     date: string;
     feedback?: Feedback;
-    image_url?: string;
+    attachmentId?:string;
 };
+
+export type ChatMessageContent = {
+    type: string;
+    text?: string;
+    image_url?:ChatImage; 
+}
+export type ChatImage ={
+    url:string;
+}
+export type BlobImage = {
+    file?:File;
+    file_id?:string;
+    sas_url?:string;
+    file_name?:string;
+}
 
 export type Conversation = {
     id: string;
@@ -102,6 +119,7 @@ export type ErrorMessage = {
 export type FrontendSettings = {
     auth_enabled?: string | null;
     feedback_enabled?: string | null;
+    image_upload_enabled?: boolean;
 }
 
 export enum Feedback {

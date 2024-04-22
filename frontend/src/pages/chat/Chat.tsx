@@ -18,6 +18,9 @@ import {
     ChatMessage,
     ConversationRequest,
     conversationApi,
+    uploadAttachment,
+    deleteAttachment,
+    getAttachment,
     Citation,
     ToolMessageContent,
     ChatResponse,
@@ -28,7 +31,9 @@ import {
     historyClear,
     ChatHistoryLoadingState,
     CosmosDBStatus,
-    ErrorMessage
+    ErrorMessage,
+    ChatMessageContent,
+    BlobImage
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
@@ -53,11 +58,11 @@ const Chat = () => {
     const abortFuncs = useRef([] as AbortController[]);
     const [showAuthMessage, setShowAuthMessage] = useState<boolean>(true);
     const [messages, setMessages] = useState<ChatMessage[]>([])
+    const [messageAttachments, setMessageAttachments] = useState<BlobImage[]>([])
     const [processMessages, setProcessMessages] = useState<messageStatus>(messageStatus.NotRunning);
     const [clearingChat, setClearingChat] = useState<boolean>(false);
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
     const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>();
-    const [imageUrl, setImageUrl] = useState<string>('');
 
     const errorDialogContentProps = {
         type: DialogType.close,
@@ -148,21 +153,56 @@ const Chat = () => {
     const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
         setIsLoading(true);
         setShowLoadingMessage(true);
+        setSelectedFiles(undefined);
         const abortController = new AbortController();
-        abortFuncs.current.unshift(abortController);        
-        const userMessage: ChatMessage = {
-            id: uuid(),
-            role: "user",
-            content: question,
-            image_url: imageUrl,
-            date: new Date().toISOString(),
-        };
+        abortFuncs.current.unshift(abortController);
+        let userMessage: ChatMessage;
+        if (typeof (question) == typeof (String)) {
+            userMessage = {
+                id: uuid(),
+                role: "user",
+                content: question.toString(),
+                date: new Date().toISOString()
+            };
+        }
+        else {
+
+            let contentWithImages: ChatMessageContent[];
+            if (!selectedFiles || !selectedFiles.sas_url) {
+                contentWithImages = [
+                    {
+                        type: "text",
+                        text: question
+                    }];
+            }
+            else {
+                contentWithImages = [
+                    {
+                        type: "text",
+                        text: question
+                    },
+                    {
+                        type: "image_url",
+                        image_url: {
+                            "url": selectedFiles?.sas_url
+                        }
+                    }];
+            }
+            userMessage = {
+                id: uuid(),
+                role: "user",
+                content: contentWithImages!,
+                date: new Date().toISOString(),
+                attachmentId: selectedFiles?.file_id
+            };
+        }
+
 
         let conversation: Conversation | null | undefined;
         if (!conversationId) {
             conversation = {
                 id: conversationId ?? uuid(),
-                title: question,
+                title: question.toString(),
                 messages: [userMessage],
                 date: new Date().toISOString(),
             }
@@ -242,6 +282,15 @@ const Chat = () => {
                 setMessages([...messages, errorChatMsg]);
             } else {
                 setMessages([...messages, userMessage])
+                const images: BlobImage[] = [];
+                messages.forEach(message => {
+                    if (message.attachmentId) {
+                        const blobStorage = getAttachment(message.attachmentId).then((res) => {
+                            images.push(res);
+                            setMessageAttachments(images)
+                        });
+                    }
+                });
             }
         } finally {
             setIsLoading(false);
@@ -258,13 +307,46 @@ const Chat = () => {
         setShowLoadingMessage(true);
         const abortController = new AbortController();
         abortFuncs.current.unshift(abortController);
+        let userMessage: ChatMessage;
+        if (typeof (question) == typeof (String)) {
+            userMessage = {
+                id: uuid(),
+                role: "user",
+                content: question.toString(),
+                date: new Date().toISOString()
+            };
+        }
+        else {
 
-        const userMessage: ChatMessage = {
-            id: uuid(),
-            role: "user",
-            content: question,
-            date: new Date().toISOString(),
-        };
+            let contentWithImages: ChatMessageContent[];
+            if (!selectedFiles || !selectedFiles.sas_url) {
+                contentWithImages = [
+                    {
+                        type: "text",
+                        text: question
+                    }];
+            }
+            else {
+                contentWithImages = [
+                    {
+                        type: "text",
+                        text: question
+                    },
+                    {
+                        type: "image_url",
+                        image_url: {
+                            "url": selectedFiles?.sas_url
+                        }
+                    }];
+            }
+            userMessage = {
+                id: uuid(),
+                role: "user",
+                content: contentWithImages,
+                date: new Date().toISOString(),
+                attachmentId: selectedFiles?.file_id
+            };
+        }
 
         //api call params set here (generate)
         let request: ConversationRequest;
@@ -319,6 +401,15 @@ const Chat = () => {
                 }
                 appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: resultConversation });
                 setMessages([...resultConversation.messages]);
+                const images: BlobImage[] = [];
+                messages.forEach(message => {
+                    if (message.attachmentId) {
+                        const blobStorage = getAttachment(message.attachmentId).then((res) => {
+                            images.push(res);
+                            setMessageAttachments(images)
+                        });
+                    }
+                });
                 return;
             }
             if (response?.body) {
@@ -473,19 +564,38 @@ const Chat = () => {
     const uploadImage = () => {
         inputFile.current!.click();
     };
-    const files: File[] = [];
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            setSelectedFiles(Array.from(event.target.files));
-            const reader = new FileReader();
-            const file = event.target.files[0];
-            reader.onloadend = () => {
-                const base64data = reader.result as string;
-                const mimeType = file.type || 'application/octet-stream';
-                setImageUrl(`data:${mimeType};base64,${base64data.split(',')[1]}`)
-            };
-            reader.readAsDataURL(file);
+    const [selectedFiles, setSelectedFiles] = useState<BlobImage>();
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (appStateContext?.state.frontendSettings?.image_upload_enabled) {
+            if (event.target.files) {
+                const file = event.target.files[0]
+                let blobImage: BlobImage = {
+                    file: file
+                }
+                //setSelectedFiles(blobImage);
+                /* const reader = new FileReader();
+                 const file = event.target.files[0];
+                 reader.onloadend = () => {
+                     const base64data = reader.result as string;
+                     const mimeType = file.type || 'application/octet-stream';
+                     setImageUrl(`data:${mimeType};base64,${base64data.split(',')[1]}`)
+                 };
+                 reader.readAsDataURL(file);*/
+                const img: BlobImage = await uploadAttachment(blobImage)
+                    .then((res) => {
+                        return res;
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        return {};
+                    });
+                if (img && img.sas_url) {
+                    console.log(img);
+                    setSelectedFiles(img);
+                    messageAttachments.push(img)
+                    setMessageAttachments(messageAttachments)
+                }
+            }
         }
     };
 
@@ -581,31 +691,52 @@ const Chat = () => {
         }
     };
 
-    const handlePaste = (event: any) => {
+    const handlePaste = async (event: any) => {
         // Überprüfen, ob ein Bild im Clipboard ist
-        if (event.clipboardData.files) {
-            setSelectedFiles(Array.from(event.clipboardData.files));
-            const reader = new FileReader();
-            const file = event.clipboardData.files[0];
-            reader.onloadend = () => {
-                const base64data = reader.result as string;
-                const mimeType = file.type || 'application/octet-stream';
-                setImageUrl(`data:${mimeType};base64,${base64data.split(',')[1]}`)
-            };
-            reader.readAsDataURL(file);
+        if (appStateContext?.state.frontendSettings?.image_upload_enabled) {
+            console.log("handlePaste")
+            if (event.clipboardData.files) {
+                if (event.target.files) {
+                    const file = event.target.files[0]
+                    let blobImage: BlobImage = {
+                        file: file
+                    }                
+                    const img: BlobImage = await uploadAttachment(blobImage)
+                        .then((res) => {
+                            return res;
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                            return {};
+                        });
+                    if (img && img.sas_url) {
+                        console.log(img);
+                        setSelectedFiles(img);
+                        messageAttachments.push(img)
+                        setMessageAttachments(messageAttachments)
+                    }
+                }
+            }
         }
     };
 
-    const resetImages = () => {
-        setSelectedFiles([]);
-        setImageUrl("");
+    const deleteImages = async () => {
+        //Todo id herausfinden       
+        if (appStateContext?.state.frontendSettings?.image_upload_enabled) {
+            const deletionStatus = await deleteAttachment(selectedFiles?.file_name!);
+            if (deletionStatus) {
+                setSelectedFiles(undefined);
+            }
+            else {
+                alert("Something went wrong with image deletion..")
+            }
+        }
     }
-
 
     const parseCitationFromMessage = (message: ChatMessage) => {
         if (message?.role && message?.role === "tool") {
             try {
-                const toolMessage = JSON.parse(message.content) as ToolMessageContent;
+                const toolMessage = JSON.parse(message.content.toString()) as ToolMessageContent;
                 return toolMessage.citations;
             }
             catch {
@@ -613,13 +744,13 @@ const Chat = () => {
             }
         }
         return [];
-    }
+    } 
 
     const disabledButton = () => {
         return isLoading || (messages && messages.length === 0) || clearingChat || appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading
     }
     return (
-        <div className={styles.container} role="main">
+        <div className={styles.container} role="main">           
             {showAuthMessage ? (
                 <Stack className={styles.chatEmptyState}>
                     <ShieldLockRegular className={styles.chatIcon} style={{ color: 'darkorange', height: "200px", width: "200px" }} />
@@ -652,13 +783,25 @@ const Chat = () => {
                                     <>
                                         {answer.role === "user" ? (
                                             <div className={styles.chatMessageUser} tabIndex={0}>
-                                                <div className={styles.chatMessageUserMessage}>{answer.content}</div>
+                                                <div className={styles.chatMessageUserMessage}>
+                                                    <div className={styles.chatImageUserMessage}>
+                                                        {answer.attachmentId !== "" ? (
+                                                            <img className={styles.imageContainer} src={messageAttachments.find(x => x.file_id === answer.attachmentId)?.sas_url} />
+                                                        )
+                                                            :
+                                                            <div></div>
+                                                        }
+                                                    </div>
+                                                    <div>
+                                                        {(answer.content as ChatMessageContent[])[0].text}
+                                                    </div>
+                                                </div>
                                             </div>
                                         ) : (
                                             answer.role === "assistant" ? <div className={styles.chatMessageGpt}>
                                                 <Answer
                                                     answer={{
-                                                        answer: answer.content,
+                                                        answer: answer.content.toString(),
                                                         citations: parseCitationFromMessage(messages[index - 1]),
                                                         message_id: answer.id,
                                                         feedback: answer.feedback
@@ -670,7 +813,7 @@ const Chat = () => {
                                                     <ErrorCircleRegular className={styles.errorIcon} style={{ color: "rgba(182, 52, 67, 1)" }} />
                                                     <span>Error</span>
                                                 </Stack>
-                                                <span className={styles.chatMessageErrorContent}>{answer.content}</span>
+                                                <span className={styles.chatMessageErrorContent}>{answer.content.toString()}</span>
                                             </div> : null
                                         )}
                                     </>
@@ -705,6 +848,16 @@ const Chat = () => {
                                 >
                                     <SquareRegular className={styles.stopGeneratingIcon} aria-hidden="true" />
                                     <span className={styles.stopGeneratingText} aria-hidden="true">Stop generating</span>
+                                </Stack>
+                            )}
+                            {selectedFiles && (
+                                <Stack
+                                    horizontal
+                                    className={styles.stopGeneratingContainer}
+                                    tabIndex={0}
+                                >
+                                    <img className={styles.imageIcon} aria-hidden="true" src={selectedFiles.sas_url} />
+                                    <span className={styles.stopGeneratingText} aria-hidden="true">Image</span>
                                 </Stack>
                             )}
                             <Stack>
@@ -756,7 +909,7 @@ const Chat = () => {
                                     disabled={disabledButton()}
                                     aria-label="clear chat button"
                                 />
-                                <CommandBarButton
+                                {appStateContext?.state.frontendSettings?.image_upload_enabled === true && < CommandBarButton
                                     role="button"
                                     styles={{
                                         icon: {
@@ -773,14 +926,16 @@ const Chat = () => {
                                             background: "#F0F0F0"
                                         }
                                     }}
-                                    title={selectedFiles.length === 0 ? "Upload Image" : "Remove Image"}
+                                    title={selectedFiles === undefined ? "Upload Image" : "Remove Image"}
                                     className={styles.uploadImageIcon}
-                                    iconProps={{ iconName: selectedFiles.length === 0 ? 'ImageSearch' : 'Delete' }}
+                                    iconProps={{ iconName: selectedFiles === undefined ? 'ImageSearch' : 'Delete' }}
                                     aria-label="Upload Image"
                                     disabled={isLoading}
-                                    onClick={selectedFiles.length === 0 ? uploadImage : resetImages}
-                                />
+                                    onClick={selectedFiles === undefined ? uploadImage : deleteImages}
+                                />}
+
                                 <input type='file' id='file' ref={inputFile} accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+
                                 <Dialog
                                     hidden={hideErrorDialog}
                                     onDismiss={handleErrorDialogClose}
@@ -793,7 +948,6 @@ const Chat = () => {
                                 clearOnSend
                                 placeholder="Type a new question..."
                                 disabled={isLoading}
-                                images={selectedFiles}
                                 onSend={(question, id) => {
                                     appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? makeApiRequestWithCosmosDB(question, id) : makeApiRequestWithoutCosmosDB(question, id)
                                 }}
