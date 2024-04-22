@@ -983,7 +983,7 @@ def generate_title(conversation_messages):
     ## make sure the messages are sorted by _ts descending
     title_prompt = 'Summarize the conversation so far into a 4-word or less title. Do not use any quotation marks or punctuation. Respond with a json object in the format {{"title": string}}. Do not include any other commentary or description.'
 
-    messages = [{'role': msg['role'], 'content': msg['content'][0].text} for msg in conversation_messages]
+    messages = [{'role': msg['role'], 'content': msg['content'][0]['text']} for msg in conversation_messages]
     messages.append({'role': 'user', 'content': title_prompt})
 
     try:
