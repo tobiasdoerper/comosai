@@ -64,6 +64,7 @@ type AppStateProviderProps = {
                 }else{
                     dispatch({ type: 'FETCH_CHAT_HISTORY', payload: null });
                 }
+                console.log("chats responses", response)
                 return response
             })
             .catch((err) => {

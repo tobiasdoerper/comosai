@@ -1,7 +1,7 @@
 import { extend } from "lodash";
 
 export type AskResponse = {
-    answer: string;
+    answer: ChatMessageContent;
     citations: Citation[];
     error?: string;
     message_id?: string;
@@ -28,7 +28,7 @@ export type ToolMessageContent = {
 export type ChatMessage = {
     id: string;
     role: string;
-    content: string | ChatMessageContent[]; 
+    content: ChatMessageContent[]; 
     end_turn?: boolean;
     date: string;
     feedback?: Feedback;

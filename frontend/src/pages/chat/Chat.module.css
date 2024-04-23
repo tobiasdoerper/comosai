@@ -126,9 +126,9 @@
 }
 .imageContainer{
     max-width: 200px;
-}
-.chatImageUserMessage{
     margin-bottom: 10px;
+}
+.chatImageUserMessage{   
     flex-direction: column;
     display: flex;
     align-items: center; /* Zentriert horizontal */

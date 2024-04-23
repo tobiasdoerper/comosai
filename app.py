@@ -74,7 +74,7 @@ AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
 AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "•\tYou are a COMOS Expert chatbot whose primary goal is to help users to configure, develop and to customize the software COMOS;\n•\tProvide concise replies that are polite and professional; \n•\tAnswer questions truthfully based on the provided information; \n•\tAlways provide coding examples when asked about coding functions;\n•\tDo not answer questions that are not related to SIEMENS Software and programing code and respond with \"I can only help with questions related to SIEMENS Process Automation software.\"; \n•\tIf you do not know the answer to a question, respond by saying “I do not know the answer to your question, Please give more details and I’ll try help you again.”.\n")
 AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-08-01-preview")
 AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
-AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-4-turbo-128k-1106") # Name of the model, e.g. 'gpt-35-turbo-16k' or 'gpt-4'
+AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-4-vision-preview") # Name of the model, e.g. 'gpt-35-turbo-16k' or 'gpt-4'
 AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT")
 AZURE_OPENAI_EMBEDDING_KEY = os.environ.get("AZURE_OPENAI_EMBEDDING_KEY")
 AZURE_OPENAI_EMBEDDING_NAME = os.environ.get("AZURE_OPENAI_EMBEDDING_NAME", "")
@@ -723,7 +723,7 @@ def add_conversation():
         messages = request.json["messages"]
         if len(messages) > 0 and messages[-1]['role'] == "user":
             global messageID
-            messageID = str(uuid.uuid4())
+            messageID = str(uuid.uuid4())            
             cosmos_conversation_client.create_message(
                 uuid=messageID,
                 username=user_name,
@@ -731,6 +731,7 @@ def add_conversation():
                 user_id=user_id,                
                 input_message=messages[-1]
             )
+            
         else:
             raise Exception("No user message found")
         
@@ -885,8 +886,26 @@ def get_conversation():
     conversation_messages = cosmos_conversation_client.get_messages(user_id, conversation_id)
 
     ## format the messages in the bot frontend format
-    messages = [{'id': msg['id'], 'role': msg['role'], 'content': msg['content'], 'createdAt': msg['createdAt'], 'feedback': msg.get('feedback')} for msg in conversation_messages]
-
+    messages = [
+        {
+            'id': msg['id'],
+            'role': msg['role'],
+            'content': [{
+                'type': 'text',
+                'text': msg['content']
+            },
+            {
+                'type':'image_url',
+                'image_url':{
+                    'url': download_image_internal(msg['attachmentId']) if 'attachmentId' in msg else ''
+                }
+            }
+            ],            
+            'createdAt': msg['createdAt'],
+            'feedback': msg.get('feedback')
+            
+        } for msg in conversation_messages]
+    
     return jsonify({"conversation_id": conversation_id, "messages": messages}), 200
 
 @app.route("/history/rename", methods=["POST"])

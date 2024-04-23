@@ -124,7 +124,10 @@ const Chat = () => {
         if (resultMessage.role === ASSISTANT) {
             assistantContent += resultMessage.content
             assistantMessage = resultMessage
-            assistantMessage.content = assistantContent
+            assistantMessage.content = [{
+                type: "text",
+                text: assistantContent
+            }]
         }
 
         if (resultMessage.role === TOOL) toolMessage = resultMessage
@@ -152,8 +155,7 @@ const Chat = () => {
      }, [assistantMessage]);*/
     const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
         setIsLoading(true);
-        setShowLoadingMessage(true);
-        setSelectedFiles(undefined);
+        setShowLoadingMessage(true);        
         const abortController = new AbortController();
         abortFuncs.current.unshift(abortController);
         let userMessage: ChatMessage;
@@ -161,7 +163,10 @@ const Chat = () => {
             userMessage = {
                 id: uuid(),
                 role: "user",
-                content: question.toString(),
+                content: [{
+                    type: "text",
+                    text: question
+                }],
                 date: new Date().toISOString()
             };
         }
@@ -193,10 +198,10 @@ const Chat = () => {
                 role: "user",
                 content: contentWithImages!,
                 date: new Date().toISOString(),
-                attachmentId: selectedFiles?.file_id
+                attachmentId: selectedFiles?.file_name
             };
         }
-
+        setSelectedFiles(undefined);
 
         let conversation: Conversation | null | undefined;
         if (!conversationId) {
@@ -274,7 +279,10 @@ const Chat = () => {
                 let errorChatMsg: ChatMessage = {
                     id: uuid(),
                     role: ERROR,
-                    content: errorMessage,
+                    content: [{
+                        type: "text",
+                        text: errorMessage
+                    }],
                     date: new Date().toISOString()
                 }
                 conversation.messages.push(errorChatMsg);
@@ -295,6 +303,7 @@ const Chat = () => {
         } finally {
             setIsLoading(false);
             setShowLoadingMessage(false);
+            setSelectedFiles(undefined);
             abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
             setProcessMessages(messageStatus.Done)
         }
@@ -304,7 +313,7 @@ const Chat = () => {
 
     const makeApiRequestWithCosmosDB = async (question: string, conversationId?: string) => {
         setIsLoading(true);
-        setShowLoadingMessage(true);
+        setShowLoadingMessage(true);        
         const abortController = new AbortController();
         abortFuncs.current.unshift(abortController);
         let userMessage: ChatMessage;
@@ -312,7 +321,10 @@ const Chat = () => {
             userMessage = {
                 id: uuid(),
                 role: "user",
-                content: question.toString(),
+                content: [{
+                    type: "text",
+                    text: question
+                }],
                 date: new Date().toISOString()
             };
         }
@@ -344,10 +356,10 @@ const Chat = () => {
                 role: "user",
                 content: contentWithImages,
                 date: new Date().toISOString(),
-                attachmentId: selectedFiles?.file_id
+                attachmentId: selectedFiles?.file_name
             };
-        }
-
+        }        
+        setSelectedFiles(undefined);
         //api call params set here (generate)
         let request: ConversationRequest;
         let conversation;
@@ -378,7 +390,10 @@ const Chat = () => {
                 let errorChatMsg: ChatMessage = {
                     id: uuid(),
                     role: ERROR,
-                    content: "There was an error generating a response. Chat history can't be saved at this time. If the problem persists, please contact the site administrator.",
+                    content: [{
+                        type: "text",
+                        text: "There was an error generating a response. Chat history can't be saved at this time. If the problem persists, please contact the site administrator."
+                    }],
                     date: new Date().toISOString()
                 }
                 let resultConversation;
@@ -489,7 +504,10 @@ const Chat = () => {
                 let errorChatMsg: ChatMessage = {
                     id: uuid(),
                     role: ERROR,
-                    content: errorMessage,
+                    content: [{
+                        type: "text",
+                        text: errorMessage
+                    }],
                     date: new Date().toISOString()
                 }
                 let resultConversation;
@@ -532,6 +550,7 @@ const Chat = () => {
             }
         } finally {
             setIsLoading(false);
+            setSelectedFiles(undefined);
             setShowLoadingMessage(false);
             abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
             setProcessMessages(messageStatus.Done)
@@ -558,6 +577,7 @@ const Chat = () => {
                 setMessages([])
             }
         }
+        setSelectedFiles(undefined);
         setClearingChat(false)
     };
     const inputFile = useRef<HTMLInputElement | null>(null);
@@ -600,6 +620,7 @@ const Chat = () => {
     };
 
     const newChat = () => {
+        setSelectedFiles(undefined);
         setProcessMessages(messageStatus.Processing)
         setMessages([])
         setIsCitationPanelOpen(false);
@@ -641,7 +662,10 @@ const Chat = () => {
                             let errorChatMsg: ChatMessage = {
                                 id: uuid(),
                                 role: ERROR,
-                                content: errorMessage,
+                                content: [{
+                                    type: "text",
+                                    text: errorMessage
+                                }],
                                 date: new Date().toISOString()
                             }
                             if (!appStateContext?.state.currentChat?.messages) {
@@ -700,7 +724,7 @@ const Chat = () => {
                     const file = event.target.files[0]
                     let blobImage: BlobImage = {
                         file: file
-                    }                
+                    }
                     const img: BlobImage = await uploadAttachment(blobImage)
                         .then((res) => {
                             return res;
@@ -744,13 +768,13 @@ const Chat = () => {
             }
         }
         return [];
-    } 
+    }
 
     const disabledButton = () => {
         return isLoading || (messages && messages.length === 0) || clearingChat || appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading
     }
     return (
-        <div className={styles.container} role="main">           
+        <div className={styles.container} role="main">
             {showAuthMessage ? (
                 <Stack className={styles.chatEmptyState}>
                     <ShieldLockRegular className={styles.chatIcon} style={{ color: 'darkorange', height: "200px", width: "200px" }} />
@@ -785,11 +809,11 @@ const Chat = () => {
                                             <div className={styles.chatMessageUser} tabIndex={0}>
                                                 <div className={styles.chatMessageUserMessage}>
                                                     <div className={styles.chatImageUserMessage}>
-                                                        {answer.attachmentId !== "" ? (
-                                                            <img className={styles.imageContainer} src={messageAttachments.find(x => x.file_id === answer.attachmentId)?.sas_url} />
+                                                        {answer.attachmentId !== "" && (answer.content as ChatMessageContent[]).length > 1 && (answer.content as ChatMessageContent[])[1]?.image_url?.url ? (
+                                                            <img className={styles.imageContainer} src={(answer.content as ChatMessageContent[])[1].image_url?.url} /> //messageAttachments.find(x => x.file_id === answer.attachmentId)?.sas_url} />
                                                         )
                                                             :
-                                                            <div></div>
+                                                            <div style={{ display: 'none' }}></div>
                                                         }
                                                     </div>
                                                     <div>
@@ -801,7 +825,7 @@ const Chat = () => {
                                             answer.role === "assistant" ? <div className={styles.chatMessageGpt}>
                                                 <Answer
                                                     answer={{
-                                                        answer: answer.content.toString(),
+                                                        answer: answer.content[0],
                                                         citations: parseCitationFromMessage(messages[index - 1]),
                                                         message_id: answer.id,
                                                         feedback: answer.feedback
@@ -813,7 +837,7 @@ const Chat = () => {
                                                     <ErrorCircleRegular className={styles.errorIcon} style={{ color: "rgba(182, 52, 67, 1)" }} />
                                                     <span>Error</span>
                                                 </Stack>
-                                                <span className={styles.chatMessageErrorContent}>{answer.content.toString()}</span>
+                                                <span className={styles.chatMessageErrorContent}>{answer.content[0].text!.toString()}</span>
                                             </div> : null
                                         )}
                                     </>
@@ -823,7 +847,7 @@ const Chat = () => {
                                         <div className={styles.chatMessageGpt}>
                                             <Answer
                                                 answer={{
-                                                    answer: "Generating answer...",
+                                                    answer: { type: "text", "text": "Generating answer..." },
                                                     citations: []
                                                 }}
                                                 onCitationClicked={() => null}
