@@ -432,7 +432,7 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
                             })
                             yield format_as_ndjson(response)
     except Exception as e:
-        yield format_as_ndjson({"error tobi" + str(e) + str(lineJson)})
+        yield format_as_ndjson({"error" + str(e) + str(lineJson)})
 
 def formatApiResponseNoStreaming(rawResponse):
     if 'error' in rawResponse:
@@ -570,9 +570,8 @@ def conversation_without_data(request_body):
         if message:
             messages.append({
                 "role": message["role"] ,
-                "content": message["content"][0]["text"]
-            })
-
+                "content": message['content']              
+            })                
     response = openai.ChatCompletion.create(
         engine=AZURE_OPENAI_MODEL,
         messages = messages,
@@ -581,7 +580,7 @@ def conversation_without_data(request_body):
         top_p=float(AZURE_OPENAI_TOP_P),
         stop=AZURE_OPENAI_STOP_SEQUENCE.split("|") if AZURE_OPENAI_STOP_SEQUENCE else None,
         stream=SHOULD_STREAM
-    )
+    )    
 
     history_metadata = request_body.get("history_metadata", {})
 
@@ -683,11 +682,11 @@ def conversation():
 
 def conversation_internal(request_body):
     try:
-        use_data = should_use_data()
-        if use_data:
-            return conversation_with_data(request_body)
-        else:
-            return conversation_without_data(request_body)
+        use_data = should_use_data()        
+        #if use_data:
+        #    return conversation_with_data(request_body)
+        #else:
+        return conversation_without_data(request_body)
     except Exception as e:
         logging.exception("Exception in /conversation")
         return jsonify({"error": str(e)}), 500
