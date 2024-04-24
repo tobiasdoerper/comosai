@@ -155,7 +155,7 @@ const Chat = () => {
      }, [assistantMessage]);*/
     const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
         setIsLoading(true);
-        setShowLoadingMessage(true);        
+        setShowLoadingMessage(true);
         const abortController = new AbortController();
         abortFuncs.current.unshift(abortController);
         let userMessage: ChatMessage;
@@ -313,7 +313,7 @@ const Chat = () => {
 
     const makeApiRequestWithCosmosDB = async (question: string, conversationId?: string) => {
         setIsLoading(true);
-        setShowLoadingMessage(true);        
+        setShowLoadingMessage(true);
         const abortController = new AbortController();
         abortFuncs.current.unshift(abortController);
         let userMessage: ChatMessage;
@@ -358,7 +358,7 @@ const Chat = () => {
                 date: new Date().toISOString(),
                 attachmentId: selectedFiles?.file_name
             };
-        }        
+        }
         setSelectedFiles(undefined);
         //api call params set here (generate)
         let request: ConversationRequest;
@@ -720,25 +720,23 @@ const Chat = () => {
         if (appStateContext?.state.frontendSettings?.image_upload_enabled) {
             console.log("handlePaste")
             if (event.clipboardData.files) {
-                if (event.target.files) {
-                    const file = event.target.files[0]
-                    let blobImage: BlobImage = {
-                        file: file
-                    }
-                    const img: BlobImage = await uploadAttachment(blobImage)
-                        .then((res) => {
-                            return res;
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                            return {};
-                        });
-                    if (img && img.sas_url) {
-                        console.log(img);
-                        setSelectedFiles(img);
-                        messageAttachments.push(img)
-                        setMessageAttachments(messageAttachments)
-                    }
+                const file = event.clipboardData.files[0]
+                let blobImage: BlobImage = {
+                    file: file
+                }
+                const img: BlobImage = await uploadAttachment(blobImage)
+                    .then((res) => {
+                        return res;
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        return {};
+                    });
+                if (img && img.sas_url) {
+                    console.log(img);
+                    setSelectedFiles(img);
+                    messageAttachments.push(img)
+                    setMessageAttachments(messageAttachments)
                 }
             }
         }
