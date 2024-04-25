@@ -1,6 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
 import styles from "./Layout.module.css";
-import Contoso from "../../assets/Contoso.svg";
+import Contoso from "../../assets/comos.png";
 import { CopyRegular } from "@fluentui/react-icons";
 import { Dialog, Stack, TextField } from "@fluentui/react";
 import { useContext, useEffect, useState } from "react";
@@ -45,7 +45,7 @@ const Layout = () => {
 
     useEffect(() => { }, [appStateContext?.state.isCosmosDBAvailable.status]);
 
-    useEffect(() => {
+useEffect(() => {
         const handleResize = () => {
           if (window.innerWidth < 480) {
             setShareLabel(undefined)

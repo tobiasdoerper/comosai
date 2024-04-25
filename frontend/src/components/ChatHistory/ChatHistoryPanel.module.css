@@ -1,6 +1,7 @@
 .container {
     max-height: calc(100vh - 100px);
     width: 300px;
+
 }
 
 .listContainer {
@@ -19,10 +20,11 @@
     box-sizing: border-box;
     border-radius: 5px;
     display: flex;
+    color: white;
 }
 
 .itemCell:hover {
-    background: #E6E6E6;
+    background: #333353;    
 }
 
 .itemButton {
@@ -39,7 +41,7 @@
 }
 
 .itemButton:hover {
-    background-color: #E6E6E6;
+    background-color: #9999A9;
 }
 
 .chatGroup {
@@ -63,6 +65,7 @@
     font-weight: 600;
     margin-bottom: 5px;
     padding-left: 15px;
+    color:white;
 }
 
 .chatTitle {
@@ -70,6 +73,7 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    color: white;
 }
 
 @media (max-width: 480px) {

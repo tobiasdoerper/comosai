@@ -1,5 +1,9 @@
+import os
 import uuid
 from datetime import datetime
+from flask import Flask, request
+from azure.identity import DefaultAzureCredential  
+from azure.cosmos import CosmosClient, PartitionKey  
 from azure.cosmos.aio import CosmosClient
 from azure.cosmos import exceptions
   
@@ -46,15 +50,18 @@ class CosmosConversationClient():
             
         return True, "CosmosDB client initialized successfully"
 
-    async def create_conversation(self, user_id, title = ''):
+
+    async def create_conversation(self, user_id, username, title = ''):
         conversation = {
             'id': str(uuid.uuid4()),  
             'type': 'conversation',
             'createdAt': datetime.utcnow().isoformat(),  
             'updatedAt': datetime.utcnow().isoformat(),  
             'userId': user_id,
+            'username':username,
             'title': title
         }
+    
         ## TODO: add some error handling based on the output of the upsert_item call
         resp = await self.container_client.upsert_item(conversation)  
         if resp:
@@ -128,17 +135,36 @@ class CosmosConversationClient():
         else:
             return conversations[0]
  
-    async def create_message(self, uuid, conversation_id, user_id, input_message: dict):
-        message = {
-            'id': uuid,
-            'type': 'message',
-            'userId' : user_id,
-            'createdAt': datetime.utcnow().isoformat(),
-            'updatedAt': datetime.utcnow().isoformat(),
-            'conversationId' : conversation_id,
-            'role': input_message['role'],
-            'content': input_message['content']
-        }
+    async def create_message(self, uuid, conversation_id,username, user_id, input_message: dict, question_id=""):
+        if len(question_id) == 0:
+            message = {
+                'id': uuid,
+                'type': 'message',
+                'userId' : user_id,
+                'createdAt': datetime.utcnow().isoformat(),
+                'updatedAt': datetime.utcnow().isoformat(),
+                'conversationId' : conversation_id,
+                'username':username,
+                'role': input_message['role'],
+                'content': input_message['content'][0]['text'],                
+            }        
+        else:
+            message = {
+                'id': uuid,
+                'type': 'message',
+                'userId' : user_id,
+                'createdAt': datetime.utcnow().isoformat(),
+                'updatedAt': datetime.utcnow().isoformat(),
+                'conversationId' : conversation_id,
+                'questionId':question_id,
+                'username':username,
+                'role': input_message['role'],
+                'content': input_message['content'][0]['text'],                    
+            }
+        
+        if ('attachmentId' in input_message):            
+            message['attachmentId'] = input_message['attachmentId']
+
 
         if self.enable_message_feedback:
             message['feedback'] = ''
@@ -155,10 +181,11 @@ class CosmosConversationClient():
         else:
             return False
     
-    async def update_message_feedback(self, user_id, message_id, feedback):
+    async def update_message_feedback(self, user_id, message_id, feedback, feedback_content):
         message = await self.container_client.read_item(item=message_id, partition_key=user_id)
         if message:
             message['feedback'] = feedback
+            message['feedback_content'] = feedback_content
             resp = await self.container_client.upsert_item(message)
             return resp
         else:

@@ -20,8 +20,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: radial-gradient(108.78% 108.78% at 50.02% 19.78%, #FFFFFF 57.29%, #EEF6FE 100%);
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+    background: rgba(243, 243, 240, 0.16);
+    /*#000028;*/
+    /*radial-gradient(108.78% 108.78% at 50.02% 19.78%, #FFFFFF 57.29%, #EEF6FE 100%);*/
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 5px rgba(0, 0, 0, 0.12);
     border-radius: 8px;
     overflow-y: auto;
     max-height: calc(100vh - 100px);
@@ -45,6 +47,7 @@
     line-height: 24px;
     margin-top: 36px;
     margin-bottom: 0px;
+    color: white;
 }
 
 .chatEmptyStateSubtitle {
@@ -53,27 +56,47 @@
     font-weight: 400;
     font-size: 16px;
     line-height: 150%;
+    display: flex;
     align-items: flex-end;
     text-align: center;
     letter-spacing: -0.01em;
-    color: #616161;
+    color: white;
 }
 
 .chatIcon {
-    height: 62px;
-    width: auto;
+    height: 82px;
 }
 
 .chatMessageStream {
     flex-grow: 1;
-    max-width: 1028px;
+    max-width: 80%;
+    /*1028px;*/
     width: 100%;
     overflow-y: auto;
     padding-left: 24px;
     padding-right: 24px;
     display: flex;
     flex-direction: column;
-    margin-top: 24px;
+    margin-top: 24px;   
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #9999A9;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background:  #333353;
 }
 
 .chatMessageUser {
@@ -83,23 +106,35 @@
 }
 
 .chatMessageUserMessage {
-    display: flex;
     padding: 20px;
-    background: #EDF5FD;
+    background: #00646E;
     border-radius: 8px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
     font-style: normal;
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
-    color: #242424;
+    color: #F3F3F0;
+    flex: none;
     order: 0;
     flex-grow: 0;
     white-space: pre-wrap;
     word-wrap: break-word;
-    max-width: 80%;
-}
+    max-width: 800px;
+    /*display: grid;   */
 
+}
+.imageContainer{
+    max-width: 100%;
+    margin-bottom: 10px;
+}
+.chatImageUserMessage{   
+    flex-direction: column;
+    max-width: 400px;
+    display: flex;
+    align-items: center; /* Zentriert horizontal */
+    justify-content: center; /* Zentriert vertikal */
+}
 .chatMessageGpt {
     margin-bottom: 12px;
     max-width: 80%;
@@ -110,8 +145,9 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: rgba(182, 52, 67, 1) 1px 1px 2px, rgba(182, 52, 67, 1) 0px 0px 1px;
-    color: #242424;
+    color: red;
     flex: none;
+    background: #333353;
     order: 0;
     flex-grow: 0;
     max-width: 800px;
@@ -150,15 +186,30 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     left: 7px;
-    top: 13px;
+    top: 40px;
     color: #FFFFFF;
     border-radius: 4px;
     z-index: 1;
 }
 
+.uploadImageIcon {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    left: 7px;
+    top: 0px;
+    color: #FFFFFF;
+    border-radius: 4px;
+    z-index: 1;
+}
 .clearChatBroomNoCosmos {
     box-sizing: border-box;
     display: flex;
@@ -166,10 +217,10 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     left: 7px;
-    top: 66px;
+    top: 80px;
     color: #FFFFFF;
     border-radius: 4px;
     z-index: 1;
@@ -182,10 +233,10 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     left: 7px;
-    top: 66px;
+    top: 80px;
     color: #FFFFFF;
     border-radius: 4px;
     z-index: 1;
@@ -211,7 +262,11 @@
 .stopGeneratingIcon {
     width: 14px;
     height: 14px;
-    color: #424242;
+    color: white;
+}
+.imageIcon {
+    width: 24px;
+    height: 24px;
 }
 
 .stopGeneratingText {
@@ -223,7 +278,7 @@
     line-height: 20px;
     display: flex;
     align-items: center;
-    color: #242424;
+    color: white;
     flex: none;
     order: 0;
     flex-grow: 0;
@@ -235,7 +290,7 @@
     align-items: flex-start;
     padding: 16px 16px;
     gap: 8px;
-    background: #FFFFFF;
+    background: #000028;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
     border-radius: 8px;
     flex: auto;
@@ -256,7 +311,7 @@
     font-weight: 600;
     font-size: 18px;
     line-height: 24px;
-    color: #000000;
+    color: white;
     flex: none;
     order: 0;
     flex-grow: 0;
@@ -265,7 +320,7 @@
 .citationPanelDismiss {
     width: 18px;
     height: 18px;
-    color: #424242;
+    color: white;
 }
 
 .citationPanelDismiss:hover {
@@ -278,10 +333,10 @@
     font-weight: 600;
     font-size: 16px;
     line-height: 22px;
-    color: #323130;
+    color: white;
     margin-top: 12px;
     margin-bottom: 12px;
-} 
+}
 
 .citationPanelTitle:hover {
     text-decoration: underline;
@@ -293,12 +348,12 @@
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
-    color: #000000;
+    color: white;
     flex: none;
     order: 1;
     align-self: stretch;
     flex-grow: 0;
-} 
+}
 
 a {
     padding-left: 5px;

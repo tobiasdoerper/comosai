@@ -39,7 +39,11 @@ const sampleCitations: Citation[] = [
 ];
 
 const sampleAnswer: AskResponse = {
-  answer: "This is an example answer with citations [doc1] and [doc2].",
+  answer:
+  {
+    type: "text",
+    text: "This is an example answer with citations [doc1] and [doc2].",
+  },
   citations: cloneDeep(sampleCitations),
 };
 

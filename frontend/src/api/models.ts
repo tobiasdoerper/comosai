@@ -1,9 +1,12 @@
+import { extend } from "lodash";
+
 export type AskResponse = {
-    answer: string;
+    answer: ChatMessageContent;
     citations: Citation[];
     error?: string;
     message_id?: string;
     feedback?: Feedback;
+    feedback_content?: string
 };
 
 export type Citation = {
@@ -26,12 +29,28 @@ export type ToolMessageContent = {
 export type ChatMessage = {
     id: string;
     role: string;
-    content: string;
+    content: ChatMessageContent[]; 
     end_turn?: boolean;
     date: string;
     feedback?: Feedback;
+    attachmentId?:string;
     context?: string;
 };
+
+export type ChatMessageContent = {
+    type: string;
+    text?: string;
+    image_url?:ChatImage; 
+}
+export type ChatImage ={
+    url:string;
+}
+export type BlobImage = {
+    file?:File;
+    file_id?:string;
+    sas_url?:string;
+    file_name?:string;
+}
 
 export type Conversation = {
     id: string;
@@ -78,7 +97,7 @@ export type UserInfo = {
 
 export enum CosmosDBStatus {
     NotConfigured = "CosmosDB is not configured",
-    NotWorking = "CosmosDB is not working",
+    NotWorking = "CosmosDB is not working",    
     InvalidCredentials = "CosmosDB has invalid credentials",
     InvalidDatabase = "Invalid CosmosDB database name",
     InvalidContainer = "Invalid CosmosDB container name",
@@ -114,6 +133,7 @@ export type UI = {
 export type FrontendSettings = {
     auth_enabled?: string | null;
     feedback_enabled?: string | null;
+    image_upload_enabled?: boolean;
     ui?: UI;
     sanitize_answer?: boolean;
 }
@@ -127,9 +147,14 @@ export enum Feedback {
     OutOfScope = "out_of_scope",
     InaccurateOrIrrelevant = "inaccurate_or_irrelevant",
     OtherUnhelpful = "other_unhelpful",
+    OtherHelpful = "other_helpful",
     HateSpeech = "hate_speech",
     Violent = "violent",
     Sexual = "sexual",
     Manipulative = "manipulative",
-    OtherHarmful = "other_harmlful"
+    OtherHarmful = "other_harmlful",
+    Efficient = "efficient",
+    Exact = "exact",
+    Creative = "creative",
+    SolvedProblem = "solved_problem"
 }

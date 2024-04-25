@@ -1,4 +1,5 @@
 import copy
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, generate_blob_sas, BlobSasPermissions
 import json
 import os
 import logging
@@ -14,7 +15,7 @@ from quart import (
     send_from_directory,
     render_template,
 )
-
+from datetime import datetime, timedelta
 from openai import AsyncAzureOpenAI
 from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider
 from backend.auth.auth_utils import get_authenticated_user_details
@@ -171,6 +172,13 @@ AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS = os.environ.get(
     "AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS"
 )
 
+# Upload Images
+AZURE_IMAGE_BLOBSTORAGE_NAME = os.environ.get("AZURE_IMAGE_BLOBSTORAGE_NAME")
+AZURE_UPLOAD_IMAGE_ALLOWED = os.environ.get("AZURE_UPLOAD_IMAGE_ALLOWED")
+AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING = os.environ.get("AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING")
+AZURE_ACCOUNT_NAME = os.environ.get("AZURE_ACCOUNT_NAME")
+AZURE_ACCOUNT_KEY = os.environ.get("AZURE_ACCOUNT_KEY")
+
 SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
 # Chat History CosmosDB Integration Settings
@@ -263,6 +271,7 @@ frontend_settings = {
         "show_share_button": UI_SHOW_SHARE_BUTTON,
     },
     "sanitize_answer": SANITIZE_ANSWER,
+    "image_upload_enabled": True
 }
 
 
@@ -326,7 +335,7 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
         endpoint = (
             AZURE_OPENAI_ENDPOINT
             if AZURE_OPENAI_ENDPOINT
-            else f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
+            else f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com"
         )
 
         # Authentication
@@ -353,7 +362,7 @@ def init_openai_client(use_data=SHOULD_USE_DATA):
             default_headers=default_headers,
             azure_endpoint=endpoint,
         )
-
+        
         return azure_openai_client
     except Exception as e:
         logging.exception("Exception in Azure OpenAI initialization", e)
@@ -421,7 +430,7 @@ def get_configured_data_source():
         # Set authentication
         authentication = {}
         if AZURE_SEARCH_KEY:
-            authentication = {"type": "api_key", "api_key": AZURE_SEARCH_KEY}
+            authentication = {"type": "api_key", "key": AZURE_SEARCH_KEY}
         else:
             # If key is not provided, assume AOAI resource identity has been granted access to the search service
             authentication = {"type": "system_assigned_managed_identity"}
@@ -430,8 +439,9 @@ def get_configured_data_source():
             "type": "azure_search",
             "parameters": {
                 "endpoint": f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
-                "authentication": authentication,
-                "index_name": AZURE_SEARCH_INDEX,
+                "authentication": authentication,               
+                "index_name": AZURE_SEARCH_INDEX,      
+                "key": AZURE_SEARCH_KEY,          
                 "fields_mapping": {
                     "content_fields": (
                         parse_multi_columns(AZURE_SEARCH_CONTENT_COLUMNS)
@@ -719,16 +729,30 @@ def get_configured_data_source():
 
     return data_source
 
+def transform_array(input_array):
+    transformed_array = []
+    logging.debug(input_array)
+    for message in input_array["messages"]:
+        if "content" in message and len(message["content"]) > 0:
+            transformed_message = {
+                "role": message["role"],
+                "content": message["content"][0]["text"]
+            }
+            transformed_array.append(transformed_message)
+    return transformed_array
+
+
 
 def prepare_model_args(request_body):
     request_messages = request_body.get("messages", [])
+
     messages = []
     if not SHOULD_USE_DATA:
         messages = [{"role": "system", "content": AZURE_OPENAI_SYSTEM_MESSAGE}]
 
     for message in request_messages:
         if message:
-            messages.append({"role": message["role"], "content": message["content"]})
+            messages.append({"role": message["role"], "content": message["content"]})    
 
     model_args = {
         "messages": messages,
@@ -743,10 +767,14 @@ def prepare_model_args(request_body):
         "stream": SHOULD_STREAM,
         "model": AZURE_OPENAI_MODEL,
     }
+    if not "vision" in AZURE_OPENAI_MODEL:
+      request_messages = transform_array({"messages": model_args['messages']})
+      logging.debug(request_messages)
+      model_args['messages'] = request_messages
 
-    if SHOULD_USE_DATA:
-        model_args["extra_body"] = {"data_sources": [get_configured_data_source()]}
-
+    if SHOULD_USE_DATA:      
+        model_args["extra_body"] = {"data_sources": [get_configured_data_source()]}        
+      
     model_args_clean = copy.deepcopy(model_args)
     if model_args_clean.get("extra_body"):
         secret_params = [
@@ -821,7 +849,7 @@ async def promptflow_request(request):
 
 async def send_chat_request(request):
     filtered_messages = []
-    messages = request.get("messages", [])
+    messages = request.get("messages", [])    
     for message in messages:
         if message.get("role") != 'tool':
             filtered_messages.append(message)
@@ -830,7 +858,8 @@ async def send_chat_request(request):
     model_args = prepare_model_args(request)
 
     try:
-        azure_openai_client = init_openai_client()
+        azure_openai_client = init_openai_client()        
+        logging.debug(model_args)           
         raw_response = await azure_openai_client.chat.completions.with_raw_response.create(**model_args)
         response = raw_response.parse()
         apim_request_id = raw_response.headers.get("apim-request-id") 
@@ -863,6 +892,82 @@ async def stream_chat_request(request_body):
             yield format_stream_response(completionChunk, history_metadata, apim_request_id)
 
     return generate()
+
+
+@bp.route("/upload/image",  methods=["POST"])
+async def upload_image():
+    files = await request.files
+    if 'file' not in files:
+        return jsonify({"error": "No file part"}), 400
+    file = files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file and allowed_file(file.filename):                
+        temp_dir = 'temporary'
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir) 
+        extension = os.path.splitext(file.filename)[1]
+        id = str(uuid.uuid4())
+        guid_filename = id + extension
+        file_path = os.path.join(temp_dir, guid_filename)
+        await file.save(file_path)
+        
+        # Hochladen der Datei nach Azure Blob Storage
+        blob_service_client = BlobServiceClient.from_connection_string(AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING)
+        blob_client = blob_service_client.get_blob_client(container=AZURE_IMAGE_BLOBSTORAGE_NAME, blob=guid_filename)
+        with open(file_path, "rb") as data:
+            blob_client.upload_blob(data, overwrite=True)
+        os.remove(file_path)  # Löschen der temporär gespeicherten Datei
+        return jsonify({"message": "File uploaded successfully to Azure Storage", "file_name": guid_filename,"file_id": id ,"sas_url": download_image_internal(guid_filename)}), 200
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
+@bp.route("/download/image/<filename>", methods=["GET"])
+def download_image(filename):    
+    try:
+        blob_url = download_image_internal(filename)
+        return jsonify({"sas_url": blob_url}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@bp.route("/delete/image/<filename>", methods=["GET"])
+def delete_image(filename):    
+    try:
+        blob_deletion_status = delete_image_internal(filename)
+        return jsonify({"deletion": blob_deletion_status}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+async def delete_image_internal(filename):
+    try:
+        # Erstellen des Blob Service Client
+        blob_service_client = await BlobServiceClient.from_connection_string(AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING)
+        
+        # Erstellen des Blob Client für den spezifischen Blob
+        blob_client = await blob_service_client.get_blob_client(container=AZURE_IMAGE_BLOBSTORAGE_NAME, blob=filename)
+        
+        # Löschen des Blobs
+        await blob_client.delete_blob()
+        return True
+    except Exception as e:
+        print("Ein Fehler ist aufgetreten:", e)
+        return False
+
+def download_image_internal(filename):        
+    sas_token = generate_blob_sas(
+        account_name=AZURE_ACCOUNT_NAME,
+        container_name=AZURE_IMAGE_BLOBSTORAGE_NAME,
+        blob_name=filename,        
+        account_key=AZURE_ACCOUNT_KEY,
+        permission=BlobSasPermissions(read=True),
+        expiry=datetime.utcnow() + timedelta(hours=1)  # Token gültig für 1 Stunde
+    )
+    blob_url = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_IMAGE_BLOBSTORAGE_NAME}/{filename}?{sas_token}"
+    return blob_url
+ 
+
+
 
 
 async def conversation_internal(request_body):
@@ -908,7 +1013,7 @@ def get_frontend_settings():
 async def add_conversation():
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user["user_principal_id"]
-
+    user_name = authenticated_user['user_name']    
     ## check request for conversation_id
     request_json = await request.get_json()
     conversation_id = request_json.get("conversation_id", None)
@@ -924,7 +1029,7 @@ async def add_conversation():
         if not conversation_id:
             title = await generate_title(request_json["messages"])
             conversation_dict = await cosmos_conversation_client.create_conversation(
-                user_id=user_id, title=title
+                user_id=user_id, title=title, username=user_name
             )
             conversation_id = conversation_dict["id"]
             history_metadata["title"] = title
@@ -934,10 +1039,13 @@ async def add_conversation():
         ## then write it to the conversation history in cosmos
         messages = request_json["messages"]
         if len(messages) > 0 and messages[-1]["role"] == "user":
+            global messageID
+            messageID = str(uuid.uuid4())    
             createdMessageValue = await cosmos_conversation_client.create_message(
-                uuid=str(uuid.uuid4()),
+                uuid=messageID,
                 conversation_id=conversation_id,
                 user_id=user_id,
+                username=user_name,
                 input_message=messages[-1],
             )
             if createdMessageValue == "Conversation not found":
@@ -965,7 +1073,8 @@ async def add_conversation():
 @bp.route("/history/update", methods=["POST"])
 async def update_conversation():
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
-    user_id = authenticated_user["user_principal_id"]
+    user_id = authenticated_user['user_principal_id']
+    user_name = authenticated_user['user_name']
 
     ## check request for conversation_id
     request_json = await request.get_json()
@@ -990,6 +1099,7 @@ async def update_conversation():
                 await cosmos_conversation_client.create_message(
                     uuid=str(uuid.uuid4()),
                     conversation_id=conversation_id,
+                    username=user_name,
                     user_id=user_id,
                     input_message=messages[-2],
                 )
@@ -997,7 +1107,9 @@ async def update_conversation():
             await cosmos_conversation_client.create_message(
                 uuid=messages[-1]["id"],
                 conversation_id=conversation_id,
+                username=user_name,
                 user_id=user_id,
+                question_id=messageID,
                 input_message=messages[-1],
             )
         else:
@@ -1023,16 +1135,19 @@ async def update_message():
     request_json = await request.get_json()
     message_id = request_json.get("message_id", None)
     message_feedback = request_json.get("message_feedback", None)
+    message_feedback_content = request_json.get("message_feedback_content", None)
     try:
         if not message_id:
             return jsonify({"error": "message_id is required"}), 400
 
         if not message_feedback:
             return jsonify({"error": "message_feedback is required"}), 400
-
+        
+        if not message_feedback_content:
+            message_feedback_content = ""
         ## update the message in cosmos
         updated_message = await cosmos_conversation_client.update_message_feedback(
-            user_id, message_id, message_feedback
+            user_id, message_id, message_feedback, message_feedback_content
         )
         if updated_message:
             return (
@@ -1168,15 +1283,24 @@ async def get_conversation():
     ## format the messages in the bot frontend format
     messages = [
         {
-            "id": msg["id"],
-            "role": msg["role"],
-            "content": msg["content"],
-            "createdAt": msg["createdAt"],
-            "feedback": msg.get("feedback"),
-        }
-        for msg in conversation_messages
-    ]
-
+            'id': msg['id'],
+            'role': msg['role'],
+            'content': [{
+                'type': 'text',
+                'text': msg['content']
+            },
+            {
+                'type':'image_url',
+                'image_url':{
+                    'url': download_image_internal(msg['attachmentId']) if 'attachmentId' in msg else ''
+                }
+            }
+            ],            
+            'createdAt': msg['createdAt'],
+            'feedback': msg.get('feedback')
+            
+        } for msg in conversation_messages]
+    
     await cosmos_conversation_client.cosmosdb_client.close()
     return jsonify({"conversation_id": conversation_id, "messages": messages}), 200
 
@@ -1354,10 +1478,7 @@ async def generate_title(conversation_messages):
     ## make sure the messages are sorted by _ts descending
     title_prompt = 'Summarize the conversation so far into a 4-word or less title. Do not use any quotation marks or punctuation. Respond with a json object in the format {{"title": string}}. Do not include any other commentary or description.'
 
-    messages = [
-        {"role": msg["role"], "content": msg["content"]}
-        for msg in conversation_messages
-    ]
+    messages = [{'role': msg['role'], 'content': msg['content'][0]['text']} for msg in conversation_messages]
     messages.append({"role": "user", "content": title_prompt})
 
     try:

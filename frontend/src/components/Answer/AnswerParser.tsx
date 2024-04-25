@@ -22,11 +22,10 @@ export const enumerateCitations = (citations: Citation[]) => {
 }
 
 export function parseAnswer(answer: AskResponse): ParsedAnswer {
-    let answerText = answer.answer;
+    let answerText = answer.answer.text!;
     const citationLinks = answerText.match(/\[(doc\d\d?\d?)]/g);
 
-    const lengthDocN = "[doc".length;
-
+    const lengthDocN = "[doc".length;    
     let filteredCitations = [] as Citation[];
     let citationReindex = 0;
     citationLinks?.forEach(link => {
@@ -39,7 +38,7 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
           citation.reindex_id = citationReindex.toString(); // reindex from 1 for display
           filteredCitations.push(citation);
         }
-    })
+    })    
 
     filteredCitations = enumerateCitations(filteredCitations);
 
