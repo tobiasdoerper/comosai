@@ -18,27 +18,22 @@ import { ThumbDislike20Filled, ThumbLike20Filled } from "@fluentui/react-icons";
 import { XSSAllowTags } from "../../constants/xssAllowTags";
 import Contoso from "../../assets/comos.png";
 
-
 interface Props {
-    answer: AskResponse;
-    onCitationClicked: (citedDocument: Citation) => void;
+  answer: AskResponse
+  onCitationClicked: (citedDocument: Citation) => void
 }
 
-export const Answer = ({
-    answer,
-    onCitationClicked
-}: Props) => {
-    const initializeAnswerFeedback = (answer: AskResponse) => {
-        if (answer.message_id == undefined) return undefined;
-        if (answer.feedback == undefined) return undefined;
-        if (answer.feedback.split(",").length > 1) return Feedback.Negative;
-        if (Object.values(Feedback).includes(answer.feedback)) return answer.feedback;
-        return Feedback.Neutral;
-    }
+export const Answer = ({ answer, onCitationClicked }: Props) => {
+  const initializeAnswerFeedback = (answer: AskResponse) => {
+    if (answer.message_id == undefined) return undefined
+    if (answer.feedback == undefined) return undefined
+    if (answer.feedback.split(',').length > 1) return Feedback.Negative
+    if (Object.values(Feedback).includes(answer.feedback)) return answer.feedback
+    return Feedback.Neutral
+  }
 
-    const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false);
-    const filePathTruncationLimit = 50;
-
+  const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false)
+  const filePathTruncationLimit = 50
     const parsedAnswer = useMemo(() => parseAnswer(answer), [answer]);
     const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen);
     const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer));
@@ -54,11 +49,7 @@ export const Answer = ({
     const handleChevronClick = () => {
         setChevronIsExpanded(!chevronIsExpanded);
         toggleIsRefAccordionOpen();
-    };
-
-    useEffect(() => {
-        setChevronIsExpanded(isRefAccordionOpen);
-    }, [isRefAccordionOpen]);
+    };  
 
     useEffect(() => {
         if (answer.message_id == undefined) return;

@@ -10,20 +10,20 @@ export type AskResponse = {
 };
 
 export type Citation = {
-    part_index?: number;
-    content: string;
-    id: string;
-    title: string | null;
-    filepath: string | null;
-    url: string | null;
-    metadata: string | null;
-    chunk_id: string | null;
-    reindex_id: string | null;
+  part_index?: number
+  content: string
+  id: string
+  title: string | null
+  filepath: string | null
+  url: string | null
+  metadata: string | null
+  chunk_id: string | null
+  reindex_id: string | null
 }
 
 export type ToolMessageContent = {
-    citations: Citation[];
-    intent: string;
+  citations: Citation[]
+  intent: string
 }
 
 export type ChatMessage = {
@@ -53,81 +53,81 @@ export type BlobImage = {
 }
 
 export type Conversation = {
-    id: string;
-    title: string;
-    messages: ChatMessage[];
-    date: string;
+  id: string
+  title: string
+  messages: ChatMessage[]
+  date: string
 }
 
 export enum ChatCompletionType {
-    ChatCompletion = "chat.completion",
-    ChatCompletionChunk = "chat.completion.chunk"
+  ChatCompletion = 'chat.completion',
+  ChatCompletionChunk = 'chat.completion.chunk'
 }
 
 export type ChatResponseChoice = {
-    messages: ChatMessage[];
+  messages: ChatMessage[]
 }
 
 export type ChatResponse = {
-    id: string;
-    model: string;
-    created: number;
-    object: ChatCompletionType;
-    choices: ChatResponseChoice[];
-    history_metadata: {
-        conversation_id: string;
-        title: string;
-        date: string;
-    }
-    error?: any;
+  id: string
+  model: string
+  created: number
+  object: ChatCompletionType
+  choices: ChatResponseChoice[]
+  history_metadata: {
+    conversation_id: string
+    title: string
+    date: string
+  }
+  error?: any
 }
 
 export type ConversationRequest = {
-    messages: ChatMessage[];
-};
+  messages: ChatMessage[]
+}
 
 export type UserInfo = {
-    access_token: string;
-    expires_on: string;
-    id_token: string;
-    provider_name: string;
-    user_claims: any[];
-    user_id: string;
-};
+  access_token: string
+  expires_on: string
+  id_token: string
+  provider_name: string
+  user_claims: any[]
+  user_id: string
+}
 
 export enum CosmosDBStatus {
-    NotConfigured = "CosmosDB is not configured",
-    NotWorking = "CosmosDB is not working",    
-    InvalidCredentials = "CosmosDB has invalid credentials",
-    InvalidDatabase = "Invalid CosmosDB database name",
-    InvalidContainer = "Invalid CosmosDB container name",
-    Working = "CosmosDB is configured and working",
+  NotConfigured = 'CosmosDB is not configured',
+  NotWorking = 'CosmosDB is not working',
+  InvalidCredentials = 'CosmosDB has invalid credentials',
+  InvalidDatabase = 'Invalid CosmosDB database name',
+  InvalidContainer = 'Invalid CosmosDB container name',
+  Working = 'CosmosDB is configured and working'
 }
 
 export type CosmosDBHealth = {
-    cosmosDB: boolean,
-    status: string
+  cosmosDB: boolean
+  status: string
 }
 
 export enum ChatHistoryLoadingState {
-    Loading = "loading",
-    Success = "success",
-    Fail = "fail",
-    NotStarted = "notStarted"
+  Loading = 'loading',
+  Success = 'success',
+  Fail = 'fail',
+  NotStarted = 'notStarted'
 }
 
 export type ErrorMessage = {
-    title: string,
-    subtitle: string
+  title: string
+  subtitle: string
 }
 
 export type UI = {
-    title: string;
-    chat_title: string;
-    chat_description: string;
-    logo?: string;
-    chat_logo?: string;
-    show_share_button?: boolean
+  title: string
+  chat_title: string
+  chat_description: string
+  logo?: string
+  chat_logo?: string
+  show_share_button?: boolean
 }
 
 export type FrontendSettings = {

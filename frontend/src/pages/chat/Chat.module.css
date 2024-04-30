@@ -1,18 +1,18 @@
 .container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 20px
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .chatRoot {
-    flex: 1;
-    display: flex;
-    margin-top: 0px;
-    margin-bottom: 20px;
-    margin-left: 20px;
-    margin-right: 20px;
-    gap: 5px;
+  flex: 1;
+  display: flex;
+  margin-top: 0px;
+  margin-bottom: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  gap: 5px;
 }
 
 .chatContainer {
@@ -30,11 +30,11 @@
 }
 
 .chatEmptyState {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .chatEmptyStateTitle {
@@ -100,9 +100,9 @@
 }
 
 .chatMessageUser {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 12px;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
 }
 
 .chatMessageUserMessage {
@@ -136,9 +136,9 @@
     justify-content: center; /* Zentriert vertikal */
 }
 .chatMessageGpt {
-    margin-bottom: 12px;
-    max-width: 80%;
-    display: flex;
+  margin-bottom: 12px;
+  max-width: 80%;
+  display: flex;
 }
 
 .chatMessageError {
@@ -155,28 +155,28 @@
 }
 
 .chatMessageErrorContent {
-    font-family: "Segoe UI";
-    font-style: normal;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 22px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    gap: 12px;
-    align-items: center;
+  font-family: 'Segoe UI';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  gap: 12px;
+  align-items: center;
 }
 
 .chatInput {
-    position: sticky;
-    flex: 0 0 100px;
-    padding-top: 12px;
-    padding-bottom: 24px;
-    padding-left: 24px;
-    padding-right: 24px;
-    width: calc(100% - 100px);
-    max-width: 1028px;
-    margin-bottom: 50px;
-    margin-top: 8px;
+  position: sticky;
+  flex: 0 0 100px;
+  padding-top: 12px;
+  padding-bottom: 24px;
+  padding-left: 24px;
+  padding-right: 24px;
+  width: calc(100% - 100px);
+  max-width: 1028px;
+  margin-bottom: 50px;
+  margin-top: 8px;
 }
 
 .clearChatBroom {
@@ -243,20 +243,20 @@
 }
 
 .stopGeneratingContainer {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 5px 16px;
-    gap: 4px;
-    position: absolute;
-    width: 161px;
-    height: 32px;
-    left: calc(50% - 161px/2 + 25.8px);
-    bottom: 116px;
-    border: 1px solid #D1D1D1;
-    border-radius: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 16px;
+  gap: 4px;
+  position: absolute;
+  width: 161px;
+  height: 32px;
+  left: calc(50% - 161px / 2 + 25.8px);
+  bottom: 116px;
+  border: 1px solid #d1d1d1;
+  border-radius: 16px;
 }
 
 .stopGeneratingIcon {
@@ -303,7 +303,7 @@
 }
 
 .citationPanelHeaderContainer {
-    width: 100%;
+  width: 100%;
 }
 
 .citationPanelHeader {
@@ -324,8 +324,8 @@
 }
 
 .citationPanelDismiss:hover {
-    background-color: #D1D1D1;
-    cursor: pointer;
+  background-color: #d1d1d1;
+  cursor: pointer;
 }
 
 .citationPanelTitle {
@@ -339,8 +339,8 @@
 }
 
 .citationPanelTitle:hover {
-    text-decoration: underline;
-    cursor: pointer;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .citationPanelContent {
@@ -356,52 +356,52 @@
 }
 
 a {
-    padding-left: 5px;
-    padding-right: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 .viewSourceButton {
-    font-style: normal;
-    font-weight: 600;
-    font-size: 12px;
-    line-height: 16px;
-    color: #115EA3;
-    flex-direction: row;
-    align-items: center;
-    padding: 4px 6px;
-    gap: 4px;
-    border: 1px solid #D1D1D1;
-    border-radius: 4px;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+  color: #115ea3;
+  flex-direction: row;
+  align-items: center;
+  padding: 4px 6px;
+  gap: 4px;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
 }
 
 .viewSourceButton:hover {
-    text-decoration: underline;
-    cursor: pointer;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 @media (max-width: 480px) {
-    .chatInput {
-        width: 90%;
-        max-width: 90%;
-    }
+  .chatInput {
+    width: 90%;
+    max-width: 90%;
+  }
 
-    .newChatIcon {
-        left: 0px;
-    }
+  .newChatIcon {
+    left: 0px;
+  }
 
-    .clearChatBroom {
-        left: 0px;
-    }
+  .clearChatBroom {
+    left: 0px;
+  }
 
-    .clearChatBroomNoCosmos {
-        left: 0px;
-    }
+  .clearChatBroomNoCosmos {
+    left: 0px;
+  }
 
-    .chatEmptyStateTitle {
-        line-height: 36px;
-    }
+  .chatEmptyStateTitle {
+    line-height: 36px;
+  }
 
-    .citationPanel {
-        max-width: 100%;
-    }
+  .citationPanel {
+    max-width: 100%;
+  }
 }
