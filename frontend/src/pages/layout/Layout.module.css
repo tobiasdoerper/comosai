@@ -5,7 +5,7 @@
 }
 
 .header {
-    background-color: transparent;
+  background-color: transparent;
 }
 
 .headerContainer {
@@ -22,38 +22,26 @@
 }
 
 .headerTitle {
-    font-style: normal;
-    font-weight: 600;
-    font-size: 20px;
-    line-height: 28px;
-    display: flex;
-    align-items: flex-end;
-    color: white;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 28px;
+  display: flex;
+  align-items: flex-end;
+  color: white;
 }
 
 .headerIcon {
-    height: 32px;
-    width: 32px;
-    margin-left: 36px;
+  height: 32px;
+  width: auto;
+  margin-left: 36px;
 }
 
 .shareButtonContainer {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 5px 12px;
-    gap: 4px;
-    width: 86px;
-    height: 32px;
-    background: radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%);
-    border-radius: 4px;
-    flex: none;
-    order: 1;
-    flex-grow: 0;
-    position: absolute;
-    right: 20px;
-    cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-right: 20px; 
 }
 
 .shareButton {
