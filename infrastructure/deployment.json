@@ -88,7 +88,7 @@
         },
         "AzureSearchTopK": {
             "type": "int",
-            "defaultValue": 20,
+            "defaultValue": 5,
             "metadata": {
                 "description": "Top K results"
             }
@@ -142,7 +142,7 @@
         },
         "AzureOpenAIModelName": {
             "type": "string",
-            "defaultValue": "gpt-4-turbo-128k-1106",
+            "defaultValue": "gpt-35-turbo",
             "metadata": {
                 "description": "Azure OpenAI Model Name"
             }
@@ -155,14 +155,14 @@
         },
         "AzureOpenAITemperature": {
             "type": "int",
-            "defaultValue": 0.7,
+            "defaultValue": 0,
             "metadata": {
                 "description": "Azure OpenAI Temperature"
             }
         },
         "AzureOpenAITopP": {
             "type": "int",
-            "defaultValue": 0.95,
+            "defaultValue": 1,
             "metadata": {
                 "description": "Azure OpenAI Top P"
             }
@@ -183,16 +183,9 @@
         },
         "AzureOpenAISystemMessage": {
             "type": "string",
-            "defaultValue": "•\tYou are a COMOS Expert chatbot whose primary goal is to help users to configure, develop and to customize the software COMOS;\n•\tProvide concise replies that are polite and professional; \n•\tAnswer questions truthfully based on the provided information; \n•\tAlways provide coding examples when asked about coding functions;\n•\tDo not answer questions that are not related to SIEMENS Software and programing code and respond with \"I can only help with questions related to SIEMENS Process Automation software.\"; \n•\tIf you do not know the answer to a question, respond by saying “I do not know the answer to your question, Please give more details and I’ll try help you again.”.\n",
+            "defaultValue": "You are an AI assistant that helps people find information.",
             "metadata": {
-                "description": "AZURE_OPENAI_SYSTEM_MESSAGE"
-            }
-        },
-        "AzureOpenAIApiVersion": {
-            "type": "string",
-            "defaultValue": "2023-06-01-preview",
-            "metadata": {
-                "description": "Azure OpenAI Api Version"
+                "description": "Azure OpenAI System Message"
             }
         },
         "AzureOpenAIStream": {
@@ -204,7 +197,7 @@
         },
         "AzureSearchQueryType": {
             "type": "string",
-            "defaultValue": "vectorSimpleHybrid",
+            "defaultValue": "simple",
             "allowedValues": [
                 "simple",
                 "semantic",
@@ -232,7 +225,7 @@
         },
         "AzureSearchStrictness": {
             "type": "int",
-            "defaultValue": 5,
+            "defaultValue": 3,
             "allowedValues": [
                 1,
                 2,
@@ -358,7 +351,7 @@
         }
     },
     "variables": {
-        "WebAppImageName": "DOCKER|fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:latest",
+        "WebAppImageName": "DOCKER|sampleappaoaichatgpt.azurecr.io/sample-app-aoai-chatgpt:latest",
         "cosmosdb_account_name": "[format('db-{0}', parameters('WebsiteName'))]",
         "cosmosdb_database_name": "db_conversation_history",
         "cosmosdb_container_name": "conversations",
@@ -484,10 +477,6 @@
                             "value": "[parameters('AzureOpenAISystemMessage')]"
                         },
                         {
-                            "name": "AZURE_OPENAI_PREVIEW_API_VERSION",
-                            "value": "[parameters('AzureOpenAIApiVersion')]"
-                        },
-                        {
                             "name": "AZURE_OPENAI_STREAM",
                             "value": "[parameters('AzureOpenAIStream')]"
                         },
@@ -578,7 +567,15 @@
                         {
                             "name": "ELASTICSEARCH_EMBEDDING_MODEL_ID",
                             "value": "[parameters('ElasticsearchEmbeddingModelId')]"
-                        }
+                        },
+                        {
+                            "name": "UWSGI_PROCESSES",
+                            "value": "2"
+                        },
+                        {
+                            "name": "UWSGI_THREADS",
+                            "value": "2"
+                        }                        
                     ],
                     "linuxFxVersion": "[variables('WebAppImageName')]"
                 }

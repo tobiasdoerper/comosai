@@ -6,7 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from "rehype-raw";
 import uuid from 'react-uuid';
-import { compact, isEmpty } from "lodash-es";
+import { isEmpty } from "lodash";
 import DOMPurify from 'dompurify';
 
 import styles from "./Chat.module.css";
@@ -49,6 +49,7 @@ const enum messageStatus {
 
 const Chat = () => {
     const appStateContext = useContext(AppStateContext)
+    const ui = appStateContext?.state.frontendSettings?.ui;
     const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled;
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -56,7 +57,7 @@ const Chat = () => {
     const [activeCitation, setActiveCitation] = useState<Citation>();
     const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false);
     const abortFuncs = useRef([] as AbortController[]);
-    const [showAuthMessage, setShowAuthMessage] = useState<boolean>(true);
+    const [showAuthMessage, setShowAuthMessage] = useState<boolean | undefined>();
     const [messages, setMessages] = useState<ChatMessage[]>([])
     const [messageAttachments, setMessageAttachments] = useState<BlobImage[]>([])
     const [processMessages, setProcessMessages] = useState<messageStatus>(messageStatus.NotRunning);
@@ -79,9 +80,13 @@ const Chat = () => {
     }
 
     const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
+    const NO_CONTENT_ERROR = "No content in messages object."
 
     useEffect(() => {
-        if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
+        if (appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.Working
+            && appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured
+            && appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail
+            && hideErrorDialog) {
             let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`
             setErrorMsg({
                 title: "Chat history is not enabled",
@@ -128,6 +133,19 @@ const Chat = () => {
                 type: "text",
                 text: assistantContent
             }]
+
+            if (resultMessage.context) {
+                toolMessage = {
+                    id: uuid(),
+                    role: TOOL,
+                    content:
+                        [{
+                            type: "text",
+                            text: resultMessage.context
+                        }],
+                    date: new Date().toISOString(),
+                }
+            }
         }
 
         if (resultMessage.role === TOOL) toolMessage = resultMessage
@@ -247,19 +265,35 @@ const Chat = () => {
                     const objects = text.split("\n");
                     objects.forEach((obj) => {
                         try {
-                            runningText += obj;
-                            result = JSON.parse(runningText);
-                            result.choices[0].messages.forEach((obj) => {
-                                obj.id = result.id;
-                                obj.date = new Date().toISOString();
-                            })
-                            setShowLoadingMessage(false);
-                            result.choices[0].messages.forEach((resultObj) => {
-                                processResultMessage(resultObj, userMessage, conversationId);
-                            })
-                            runningText = "";
+                            if (obj !== "" && obj !== "{}") {
+                                runningText += obj;
+                                result = JSON.parse(runningText);
+                                if (result.choices?.length > 0) {
+                                    result.choices[0].messages.forEach((msg) => {
+                                        msg.id = result.id;
+                                        msg.date = new Date().toISOString();
+                                    })
+                                    if (result.choices[0].messages?.some(m => m.role === ASSISTANT)) {
+                                        setShowLoadingMessage(false);
+                                    }
+                                    result.choices[0].messages.forEach((resultObj) => {
+                                        processResultMessage(resultObj, userMessage, conversationId);
+                                    })
+                                }
+                                else if (result.error) {
+                                    throw Error(result.error);
+                                }
+                                runningText = "";
+                            }
                         }
-                        catch { }
+                        catch (e) {
+                            if (!(e instanceof SyntaxError)) {
+                                console.error(e);
+                                throw e;
+                            } else {
+                                console.log("Incomplete message. Continuing...")
+                            }
+                        }
                     });
                 }
                 conversation.messages.push(toolMessage, assistantMessage)
@@ -387,12 +421,14 @@ const Chat = () => {
         try {
             const response = conversationId ? await historyGenerate(request, abortController.signal, conversationId) : await historyGenerate(request, abortController.signal);
             if (!response?.ok) {
+                const responseJson = await response.json();
+                var errorResponseMessage = responseJson.error === undefined ? "Please try again. If the problem persists, please contact the site administrator." : responseJson.error;
                 let errorChatMsg: ChatMessage = {
                     id: uuid(),
                     role: ERROR,
                     content: [{
                         type: "text",
-                        text: "There was an error generating a response. Chat history can't be saved at this time. If the problem persists, please contact the site administrator."
+                        text: `There was an error generating a response. Chat history can't be saved at this time. ${errorResponseMessage}`,
                     }],
                     date: new Date().toISOString()
                 }
@@ -440,19 +476,39 @@ const Chat = () => {
                     const objects = text.split("\n");
                     objects.forEach((obj) => {
                         try {
-                            runningText += obj;
-                            result = JSON.parse(runningText);
-                            result.choices[0].messages.forEach((obj) => {
-                                obj.id = result.id;
-                                obj.date = new Date().toISOString();
-                            })
-                            setShowLoadingMessage(false);
-                            result.choices[0].messages.forEach((resultObj) => {
-                                processResultMessage(resultObj, userMessage, conversationId);
-                            })
-                            runningText = "";
+                            if (obj !== "" && obj !== "{}") {
+                                runningText += obj;
+                                result = JSON.parse(runningText);
+                                if (!result.choices?.[0]?.messages?.[0].content) {
+                                    errorResponseMessage = NO_CONTENT_ERROR;
+                                    throw Error();
+                                }
+                                if (result.choices?.length > 0) {
+                                    result.choices[0].messages.forEach((msg) => {
+                                        msg.id = result.id;
+                                        msg.date = new Date().toISOString();
+                                    })
+                                    if (result.choices[0].messages?.some(m => m.role === ASSISTANT)) {
+                                        setShowLoadingMessage(false);
+                                    }
+                                    result.choices[0].messages.forEach((resultObj) => {
+                                        processResultMessage(resultObj, userMessage, conversationId);
+                                    })
+                                }
+                                runningText = "";
+                            }
+                            else if (result.error) {
+                                throw Error(result.error);
+                            }
                         }
-                        catch { }
+                        catch (e) {
+                            if (!(e instanceof SyntaxError)) {
+                                console.error(e);
+                                throw e;
+                            } else {
+                                console.log("Incomplete message. Continuing...")
+                            }
+                        }
                     });
                 }
 
@@ -494,7 +550,7 @@ const Chat = () => {
 
         } catch (e) {
             if (!abortController.signal.aborted) {
-                let errorMessage = "An error occurred. Please try again. If the problem persists, please contact the site administrator.";
+                let errorMessage = `An error occurred. ${errorResponseMessage}`;
                 if (result.error?.message) {
                     errorMessage = result.error.message;
                 }
@@ -524,6 +580,16 @@ const Chat = () => {
                 } else {
                     if (!result.history_metadata) {
                         console.error("Error retrieving data.", result);
+                        let errorChatMsg: ChatMessage = {
+                            id: uuid(),
+                            role: ERROR,
+                            content: [{
+                                type: "text",
+                                text: errorMessage
+                            }],
+                            date: new Date().toISOString()
+                        }
+                        setMessages([...messages, userMessage, errorChatMsg])
                         setIsLoading(false);
                         setShowLoadingMessage(false);
                         abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
@@ -655,39 +721,43 @@ const Chat = () => {
                     console.error("Failure fetching current chat state.")
                     return
                 }
-                saveToDB(appStateContext.state.currentChat.messages, appStateContext.state.currentChat.id)
-                    .then((res) => {
-                        if (!res.ok) {
-                            let errorMessage = "An error occurred. Answers can't be saved at this time. If the problem persists, please contact the site administrator.";
-                            let errorChatMsg: ChatMessage = {
-                                id: uuid(),
-                                role: ERROR,
-                                content: [{
-                                    type: "text",
-                                    text: errorMessage
-                                }],
-                                date: new Date().toISOString()
-                            }
-                            if (!appStateContext?.state.currentChat?.messages) {
-                                let err: Error = {
-                                    ...new Error,
-                                    message: "Failure fetching current chat state."
+                const noContentError = appStateContext.state.currentChat.messages.find(m => m.role === ERROR)
+
+                if (!noContentError?.content[0].text?.includes(NO_CONTENT_ERROR)) {
+                    saveToDB(appStateContext.state.currentChat.messages, appStateContext.state.currentChat.id)
+                        .then((res) => {
+                            if (!res.ok) {
+                                let errorMessage = "An error occurred. Answers can't be saved at this time. If the problem persists, please contact the site administrator.";
+                                let errorChatMsg: ChatMessage = {
+                                    id: uuid(),
+                                    role: ERROR,
+                                    content: [{
+                                        type: "text",
+                                        text: errorMessage
+                                    }],
+                                    date: new Date().toISOString()
                                 }
-                                throw err
+                                if (!appStateContext?.state.currentChat?.messages) {
+                                    let err: Error = {
+                                        ...new Error,
+                                        message: "Failure fetching current chat state."
+                                    }
+                                    throw err
+                                }
+                                setMessages([...appStateContext?.state.currentChat?.messages, errorChatMsg])
                             }
-                            setMessages([...appStateContext?.state.currentChat?.messages, errorChatMsg])
-                        }
-                        return res as Response
-                    })
-                    .catch((err) => {
-                        console.error("Error: ", err)
-                        let errRes: Response = {
-                            ...new Response,
-                            ok: false,
-                            status: 500,
-                        }
-                        return errRes;
-                    })
+                            return res as Response
+                        })
+                        .catch((err) => {
+                            console.error("Error: ", err)
+                            let errRes: Response = {
+                                ...new Response,
+                                ok: false,
+                                status: 500,
+                            }
+                            return errRes;
+                        })
+                }
             } else {
             }
             appStateContext?.dispatch({ type: 'UPDATE_CHAT_HISTORY', payload: appStateContext.state.currentChat });
@@ -778,10 +848,8 @@ const Chat = () => {
                     <ShieldLockRegular className={styles.chatIcon} style={{ color: 'darkorange', height: "200px", width: "200px" }} />
                     <h1 className={styles.chatEmptyStateTitle}>Authentication Not Configured</h1>
                     <h2 className={styles.chatEmptyStateSubtitle}>
-                        This app does not have authentication configured. Please add an identity provider by finding your app in the
-                        <a href="https://portal.azure.com/" target="_blank"> Azure Portal </a>
-                        and following
-                        <a href="https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service#3-configure-authentication-and-authorization" target="_blank"> these instructions</a>.
+                        This app does not have authentication configured. Please add an identity provider by finding your app in the <a href="https://portal.azure.com/" target="_blank">Azure Portal</a>
+                        and following <a href="https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service#3-configure-authentication-and-authorization" target="_blank">these instructions</a>.
                     </h2>
                     <h2 className={styles.chatEmptyStateSubtitle} style={{ fontSize: "20px" }}><strong>Authentication configuration takes a few minutes to apply. </strong></h2>
                     <h2 className={styles.chatEmptyStateSubtitle} style={{ fontSize: "20px" }}><strong>If you deployed in the last 10 minutes, please wait and reload the page after 10 minutes.</strong></h2>
@@ -792,12 +860,12 @@ const Chat = () => {
                         {!messages || messages.length < 1 ? (
                             <Stack className={styles.chatEmptyState}>
                                 <img
-                                    src={Contoso}
+                                    src={ui?.chat_logo ? ui.chat_logo : Contoso}
                                     className={styles.chatIcon}
                                     aria-hidden="true"
                                 />
-                                <h1 className={styles.chatEmptyStateTitle}> Need Help? </h1>
-                                <h2 className={styles.chatEmptyStateSubtitle}> This is a COMOS expert, consider as your new colleague at SIEMENS DI PA SW, let's talk! </h2>
+                                <h1 className={styles.chatEmptyStateTitle}>{ui?.chat_title}</h1>
+                                <h2 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h2>
                             </Stack>
                         ) : (
                             <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px" }} role="log">

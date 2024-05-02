@@ -12,30 +12,28 @@ import { parseAnswer } from "./AnswerParser";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import supersub from 'remark-supersub'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ThumbDislike20Filled, ThumbLike20Filled } from "@fluentui/react-icons";
 import { XSSAllowTags } from "../../constants/xssAllowTags";
 import Contoso from "../../assets/comos.png";
 
-
 interface Props {
-    answer: AskResponse;
-    onCitationClicked: (citedDocument: Citation) => void;
+  answer: AskResponse
+  onCitationClicked: (citedDocument: Citation) => void
 }
 
-export const Answer = ({
-    answer,
-    onCitationClicked
-}: Props) => {
-    const initializeAnswerFeedback = (answer: AskResponse) => {
-        if (answer.message_id == undefined) return undefined;
-        if (answer.feedback == undefined) return undefined;
-        if (Object.values(Feedback).includes(answer.feedback)) return answer.feedback;
-        return Feedback.Neutral;
-    }
+export const Answer = ({ answer, onCitationClicked }: Props) => {
+  const initializeAnswerFeedback = (answer: AskResponse) => {
+    if (answer.message_id == undefined) return undefined
+    if (answer.feedback == undefined) return undefined
+    if (answer.feedback.split(',').length > 1) return Feedback.Negative
+    if (Object.values(Feedback).includes(answer.feedback)) return answer.feedback
+    return Feedback.Neutral
+  }
 
-    const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false);
-    const filePathTruncationLimit = 50;
-
+  const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false)
+  const filePathTruncationLimit = 50
     const parsedAnswer = useMemo(() => parseAnswer(answer), [answer]);
     const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen);
     const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer));
@@ -45,16 +43,13 @@ export const Answer = ({
     const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([]);
     const [positiveFeedbackList, setPositiveFeedbackList] = useState<Feedback[]>([]);
     const appStateContext = useContext(AppStateContext)
-    const FEEDBACK_ENABLED = appStateContext?.state.frontendSettings?.feedback_enabled;
+    const FEEDBACK_ENABLED = appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB;
+    const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer
 
     const handleChevronClick = () => {
         setChevronIsExpanded(!chevronIsExpanded);
         toggleIsRefAccordionOpen();
-    };
-
-    useEffect(() => {
-        setChevronIsExpanded(isRefAccordionOpen);
-    }, [isRefAccordionOpen]);
+    };  
 
     useEffect(() => {
         if (answer.message_id == undefined) return;
@@ -71,13 +66,14 @@ export const Answer = ({
     const createCitationFilepath = (citation: Citation, index: number, truncate: boolean = false) => {
         let citationFilename = "";
 
-        if (citation.filepath && citation.chunk_id) {
+        if (citation.filepath) {
+            const part_i = citation.part_index ?? (citation.chunk_id ? parseInt(citation.chunk_id) + 1 : '');
             if (truncate && citation.filepath.length > filePathTruncationLimit) {
                 const citationLength = citation.filepath.length;
-                citationFilename = `${citation.filepath.substring(0, 20)}...${citation.filepath.substring(citationLength - 20)} - Part ${parseInt(citation.chunk_id) + 1}`;
+                citationFilename = `${citation.filepath.substring(0, 20)}...${citation.filepath.substring(citationLength - 20)} - Part ${part_i}`;
             }
             else {
-                citationFilename = `${citation.filepath} - Part ${parseInt(citation.chunk_id) + 1}`;
+                citationFilename = `${citation.filepath} - Part ${part_i}`;
             }
         }
         else if (citation.filepath && citation.reindex_id) {
@@ -227,6 +223,21 @@ export const Answer = ({
             </>
         );
     }
+    const components = {
+        code({ node, ...props }: { node: any, [key: string]: any }) {
+            let language;
+            if (props.className) {
+                const match = props.className.match(/language-(\w+)/);
+                language = match ? match[1] : undefined;
+            }
+            const codeString = node.children[0].value ?? '';
+            return (
+                <SyntaxHighlighter style={nord} language={language} PreTag="div" {...props}>
+                    {codeString}
+                </SyntaxHighlighter>
+            );
+        },
+    };
 
     return (
         <>
@@ -246,8 +257,9 @@ export const Answer = ({
                                 <ReactMarkdown
                                     linkTarget="_blank"
                                     remarkPlugins={[remarkGfm, supersub]}
-                                    children={parsedAnswer.markdownFormatText}
+                                    children={SANITIZE_ANSWER ? DOMPurify.sanitize(parsedAnswer.markdownFormatText, { ALLOWED_TAGS: XSSAllowTags }) : parsedAnswer.markdownFormatText}
                                     className={styles.answerText}
+                                    components={components}
                                 />
                             </Stack.Item>
                             <Stack.Item className={styles.answerHeader}>
@@ -302,7 +314,7 @@ export const Answer = ({
                         </Stack.Item>
                     </Stack>
                     {chevronIsExpanded &&
-                        <div style={{ marginTop: 8, display: "flex", flexFlow: "wrap column", maxHeight: "150px", gap: "4px" }}>
+                        <div className={styles.citationWrapper} >
                             {parsedAnswer.citations.map((citation, idx) => {
                                 return (
                                     <span
@@ -345,7 +357,7 @@ export const Answer = ({
                     }]
                 }}
                 dialogContentProps={{
-                    title: "Negative Feedback",
+                    title: "Submit Feedback",
                     showCloseButton: true
                 }}
             >
