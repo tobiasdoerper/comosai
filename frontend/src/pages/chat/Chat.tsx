@@ -49,7 +49,7 @@ const enum messageStatus {
 
 const Chat = () => {
     const appStateContext = useContext(AppStateContext)
-    const ui = appStateContext?.state.frontendSettings?.ui;
+    const ui = appStateContext?.state.frontendSettings?.ui; 
     const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled;
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -93,7 +93,7 @@ const Chat = () => {
                 subtitle: subtitle
             })
             toggleErrorDialog();
-        }
+        }       
     }, [appStateContext?.state.isCosmosDBAvailable]);
 
     const handleErrorDialogClose = () => {
@@ -951,88 +951,153 @@ const Chat = () => {
                                 </Stack>
                             )}
                             <Stack>
-                                {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <CommandBarButton
-                                    role="button"
-                                    styles={{
-                                        icon: {
-                                            color: '#F3F3F0',
-                                        },
-                                        iconDisabled: {
-                                            color: "#BDBDBD !important"
-                                        },
-                                        root: {
-                                            color: '#FFFFFF',
-                                            background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
-                                        },
-                                        rootDisabled: {
-                                            background: "#F0F0F0"
-                                        }
-                                    }}
-                                    title="Start a new chat"
-                                    className={styles.newChatIcon}
-                                    iconProps={{ iconName: 'Add' }}
-                                    onClick={newChat}
-                                    disabled={disabledButton()}
-                                    aria-label="start a new chat button"
-                                />}
-                                <CommandBarButton
-                                    role="button"
-                                    styles={{
-                                        icon: {
-                                            color: '#F3F3F0',
-                                        },
-                                        iconDisabled: {
-                                            color: "#BDBDBD !important",
-                                        },
-                                        root: {
-                                            color: '#FFFFFF',
-                                            background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
-                                        },
-                                        rootDisabled: {
-                                            background: "#F0F0F0"
-                                        }
-                                    }}
-                                    title="Clear chat"
-                                    className={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? styles.clearChatBroom : styles.clearChatBroomNoCosmos}
-                                    iconProps={{ iconName: 'Broom' }}
-                                    onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
-                                    disabled={disabledButton()}
-                                    aria-label="clear chat button"
-                                />
-                                {appStateContext?.state.frontendSettings?.image_upload_enabled === true && < CommandBarButton
-                                    role="button"
-                                    styles={{
-                                        icon: {
-                                            color: '#F3F3F0',
-                                        },
-                                        iconDisabled: {
-                                            color: "#BDBDBD !important",
-                                        },
-                                        root: {
-                                            color: '#FFFFFF',
-                                            background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
-                                        },
-                                        rootDisabled: {
-                                            background: "#F0F0F0"
-                                        }
-                                    }}
-                                    title={selectedFiles === undefined ? "Upload Image" : "Remove Image"}
-                                    className={styles.uploadImageIcon}
-                                    iconProps={{ iconName: selectedFiles === undefined ? 'ImageSearch' : 'Delete' }}
-                                    aria-label="Upload Image"
-                                    disabled={isLoading}
-                                    onClick={selectedFiles === undefined ? uploadImage : deleteImages}
-                                />}
+                                {appStateContext?.state.frontendSettings?.image_upload_enabled == true &&
+                                    <Stack>
+                                        {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <CommandBarButton
+                                            role="button"
+                                            styles={{
+                                                icon: {
+                                                    color: '#F3F3F0',
+                                                },
+                                                iconDisabled: {
+                                                    color: "#BDBDBD !important"
+                                                },
+                                                root: {
+                                                    color: '#FFFFFF',
+                                                    background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
+                                                },
+                                                rootDisabled: {
+                                                    background: "#F0F0F0"
+                                                }
+                                            }}
+                                            title="Start a new chat"
+                                            className={styles.newChatIcon}
+                                            iconProps={{ iconName: 'Add' }}
+                                            onClick={newChat}
+                                            disabled={disabledButton()}
+                                            aria-label="start a new chat button"
+                                        />}
+                                        <CommandBarButton
+                                            role="button"
+                                            styles={{
+                                                icon: {
+                                                    color: '#F3F3F0',
+                                                },
+                                                iconDisabled: {
+                                                    color: "#BDBDBD !important",
+                                                },
+                                                root: {
+                                                    color: '#FFFFFF',
+                                                    background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
+                                                },
+                                                rootDisabled: {
+                                                    background: "#F0F0F0"
+                                                }
+                                            }}
+                                            title="Clear chat"
+                                            className={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? styles.clearChatBroom : styles.clearChatBroomNoCosmos}
+                                            iconProps={{ iconName: 'Broom' }}
+                                            onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
+                                            disabled={disabledButton()}
+                                            aria-label="clear chat button"
+                                        />
+                                        {appStateContext?.state.frontendSettings?.image_upload_enabled === true && < CommandBarButton
+                                            role="button"
+                                            styles={{
+                                                icon: {
+                                                    color: '#F3F3F0',
+                                                },
+                                                iconDisabled: {
+                                                    color: "#BDBDBD !important",
+                                                },
+                                                root: {
+                                                    color: '#FFFFFF',
+                                                    background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
+                                                },
+                                                rootDisabled: {
+                                                    background: "#F0F0F0"
+                                                }
+                                            }}
+                                            title={selectedFiles === undefined ? "Upload Image" : "Remove Image"}
+                                            className={styles.uploadImageIcon}
+                                            iconProps={{ iconName: selectedFiles === undefined ? 'ImageSearch' : 'Delete' }}
+                                            aria-label="Upload Image"
+                                            disabled={isLoading}
+                                            onClick={selectedFiles === undefined ? uploadImage : deleteImages}
+                                        />}
 
-                                <input type='file' id='file' ref={inputFile} accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+                                        <input type='file' id='file' ref={inputFile} accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
 
-                                <Dialog
-                                    hidden={hideErrorDialog}
-                                    onDismiss={handleErrorDialogClose}
-                                    dialogContentProps={errorDialogContentProps}
-                                    modalProps={modalProps}
-                                >
-                                </Dialog>
+                                        <Dialog
+                                            hidden={hideErrorDialog}
+                                            onDismiss={handleErrorDialogClose}
+                                            dialogContentProps={errorDialogContentProps}
+                                            modalProps={modalProps}
+                                        >
+                                        </Dialog>
+                                    </Stack>
+                                }
+                            </Stack>
+                            <Stack>
+                                {appStateContext?.state.frontendSettings?.image_upload_enabled == false &&
+                                    <Stack>
+                                        {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <CommandBarButton
+                                            role="button"
+                                            styles={{
+                                                icon: {
+                                                    color: '#F3F3F0',
+                                                },
+                                                iconDisabled: {
+                                                    color: "#BDBDBD !important"
+                                                },
+                                                root: {
+                                                    color: '#FFFFFF',
+                                                    background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
+                                                },
+                                                rootDisabled: {
+                                                    background: "#F0F0F0"
+                                                }
+                                            }}
+                                            title="Start a new chat"
+                                            className={styles.newChatIconWithOutImage}
+                                            iconProps={{ iconName: 'Add' }}
+                                            onClick={newChat}
+                                            disabled={disabledButton()}
+                                            aria-label="start a new chat button"
+                                        />}
+                                        <CommandBarButton
+                                            role="button"
+                                            styles={{
+                                                icon: {
+                                                    color: '#F3F3F0',
+                                                },
+                                                iconDisabled: {
+                                                    color: "#BDBDBD !important",
+                                                },
+                                                root: {
+                                                    color: '#FFFFFF',
+                                                    background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%)",
+                                                },
+                                                rootDisabled: {
+                                                    background: "#F0F0F0"
+                                                }
+                                            }}
+                                            title="Clear chat"
+                                            className={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? styles.clearChatBroomWithOutImage : styles.clearChatBroomNoCosmosWithOutImage}
+                                            iconProps={{ iconName: 'Broom' }}
+                                            onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
+                                            disabled={disabledButton()}
+                                            aria-label="clear chat button"
+                                        />
+                                        <Dialog
+                                            hidden={hideErrorDialog}
+                                            onDismiss={handleErrorDialogClose}
+                                            dialogContentProps={errorDialogContentProps}
+                                            modalProps={modalProps}
+                                        >
+                                        </Dialog>
+                                    </Stack>
+                                }
                             </Stack>
                             <QuestionInput
                                 clearOnSend

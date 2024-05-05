@@ -40,6 +40,7 @@ load_dotenv()
 
 # UI configuration (optional)
 UI_TITLE = os.environ.get("UI_TITLE") or "Contoso"
+UI_THEME = os.environ.get("UI_THEME", "siemens") 
 UI_LOGO = os.environ.get("UI_LOGO")
 UI_CHAT_LOGO = os.environ.get("UI_CHAT_LOGO")
 UI_CHAT_TITLE = os.environ.get("UI_CHAT_TITLE") or "Start chatting"
@@ -175,6 +176,7 @@ AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS = os.environ.get(
 # Upload Images
 AZURE_IMAGE_BLOBSTORAGE_NAME = os.environ.get("AZURE_IMAGE_BLOBSTORAGE_NAME")
 AZURE_UPLOAD_IMAGE_ALLOWED = os.environ.get("AZURE_UPLOAD_IMAGE_ALLOWED")
+AZURE_UPLOAD_IMAGE_ALLOWED = AZURE_UPLOAD_IMAGE_ALLOWED.lower() == "true" if AZURE_UPLOAD_IMAGE_ALLOWED else False
 AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING = os.environ.get("AZURE_IMAGE_BLOBSTORAGE_CONNECTION_STRING")
 AZURE_ACCOUNT_NAME = os.environ.get("AZURE_ACCOUNT_NAME")
 AZURE_ACCOUNT_KEY = os.environ.get("AZURE_ACCOUNT_KEY")
@@ -272,9 +274,10 @@ frontend_settings = {
         "chat_title": UI_CHAT_TITLE,
         "chat_description": UI_CHAT_DESCRIPTION,
         "show_share_button": UI_SHOW_SHARE_BUTTON,
+        "design_theme":UI_THEME
     },
     "sanitize_answer": SANITIZE_ANSWER,
-    "image_upload_enabled": True
+    "image_upload_enabled": AZURE_UPLOAD_IMAGE_ALLOWED
 }
 
 

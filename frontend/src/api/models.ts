@@ -128,6 +128,7 @@ export type UI = {
   logo?: string
   chat_logo?: string
   show_share_button?: boolean
+  design_theme?:string
 }
 
 export type FrontendSettings = {

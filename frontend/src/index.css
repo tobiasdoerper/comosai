@@ -2,15 +2,34 @@
     box-sizing: border-box;
 }
 
+body{
+    --bg-color: radial-gradient(102.81% 108.2% at 100.1% 90.19%, #000028 43.63%, #009999 180%, #009999 100%);
+    --bg-link: #00E6DC;
+    --bg-color-headers: white;
+    --bg-color-headers-light: rgba(255, 255, 255, 0.664);
+    --bg-color-icon:white;
+    --bg-color-borders: white;
+    --bg-color-answer: #333353;
+    --bg-color-question: #00646e;
+}
+
+body[data-theme="comos"] {
+    --bg-color: #92b9bd;
+    --bg-link: blue;
+    --bg-color-headers: White; /*var(--bg-color-headers) !important;*/
+    --bg-color-icon:White;/*var(--bg-color-icon) !important;*/
+    --bg-color-headers-light: rgba(255, 255, 255, 0.664);
+    --bg-color-borders: White;
+    --bg-color-answer: #8ca3af;
+    --bg-color-question: #abaeb1;
+}
+
 html,
 body {
     height: 100%;
     margin: 0;
     padding: 0;
-}
-
-html {
-    background: radial-gradient(102.81% 108.2% at 100.1% 90.19%, #000028 43.63%, #009999 180%, #009999 100%);
+    background: var(--bg-color) !important;
     font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -21,6 +40,7 @@ html {
     animation-timing-function: ease-in-out;
     background-size: 200% 200%;
 }
+
 
 @keyframes farbverlaufAnimation {
     0% {
@@ -37,7 +57,7 @@ html {
 }
 
 a {
-    color: #00E6DC;
+    color: var(--bg-color) !important;
 }
 
 #root {
