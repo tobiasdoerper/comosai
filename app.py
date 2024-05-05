@@ -1104,7 +1104,7 @@ def transform_json(input_json):
         }
         output_messages.append(new_message)
 
-    return {"messages": output_messages}
+    return output_messages
 
 
 @bp.route("/history/update", methods=["POST"])
