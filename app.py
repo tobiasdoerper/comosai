@@ -1095,11 +1095,13 @@ async def update_conversation():
         # check for the conversation_id, if the conversation is not set, we will create a new one
         if not conversation_id:
             raise Exception("No conversation_id found")
-        if not "vision" in AZURE_OPENAI_MODEL:
-            messages = transform_array(messages)
+       
         ## Format the incoming message object in the "chat/completions" messages format
         ## then write it to the conversation history in cosmos
         messages = request_json["messages"]
+        if not "vision" in AZURE_OPENAI_MODEL:
+            logging.debug(messages)
+            messages = transform_array(messages)
         if len(messages) > 0 and messages[-1]["role"] == "assistant":
             if len(messages) > 1 and messages[-2].get("role", None) == "tool":
                 # write the tool message first
