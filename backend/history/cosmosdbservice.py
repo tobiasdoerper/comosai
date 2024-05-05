@@ -146,7 +146,7 @@ class CosmosConversationClient():
                 'conversationId' : conversation_id,
                 'username':username,
                 'role': input_message['role'],
-                'content': input_message['content'][0]['text'],                
+                'content': input_message['content'],                
             }        
         else:
             message = {
@@ -159,7 +159,7 @@ class CosmosConversationClient():
                 'questionId':question_id,
                 'username':username,
                 'role': input_message['role'],
-                'content': input_message['content'][0]['text'],                    
+                'content': input_message['content'],                    
             }
         
         if ('attachmentId' in input_message):            
