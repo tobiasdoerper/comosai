@@ -739,14 +739,22 @@ def transform_array(input_array):
     transformed_array = []
     logging.debug(input_array)
     for message in input_array["messages"]:
-        if "content" in message and len(message["content"]) > 0:
-            transformed_message = {
-                "role": message["role"],
-                "content": message["content"][0]["text"]
-            }
+        # Überprüfe, ob "content" vorhanden ist und entweder ein String oder ein Array ist
+        if "content" in message and (isinstance(message["content"], str) or isinstance(message["content"], list)):
+            if isinstance(message["content"], str):
+                transformed_message = {
+                    "role": message["role"],
+                    "content": message["content"]
+                }
+            elif isinstance(message["content"], list) and len(message["content"]) > 0:
+                transformed_message = {
+                    "role": message["role"],
+                    "content": message["content"][0]["text"]
+                }
+            else:
+                continue  # Überspringe diese Nachricht, wenn "content" ein leeres Array ist
             transformed_array.append(transformed_message)
     return transformed_array
-
 
 
 def prepare_model_args(request_body):
@@ -1098,10 +1106,11 @@ async def update_conversation():
        
         ## Format the incoming message object in the "chat/completions" messages format
         ## then write it to the conversation history in cosmos        
-        if not "vision" in AZURE_OPENAI_MODEL:           
-            messages = transform_array(request_json)
-        else:
-            messages = request_json["messages"]
+        #if not "vision" in AZURE_OPENAI_MODEL:           
+        #    messages = transform_array(request_json)
+        #else:
+        #    messages = request_json["messages"]
+        messages = transform_array(request_json)
         logging.debug(messages)
         if len(messages) > 0 and messages[-1]["role"] == "assistant":
             if len(messages) > 1 and messages[-2].get("role", None) == "tool":
