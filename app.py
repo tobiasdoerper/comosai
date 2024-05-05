@@ -1083,6 +1083,29 @@ async def add_conversation():
         logging.exception("Exception in /history/generate")
         return jsonify({"error": str(e)}), 500
 
+def transform_json(input_json):
+    output_messages = []
+    for message in input_json['messages']:
+        if 'content' in message:
+            if isinstance(message['content'], list):  # If content is a list
+                message_content = message['content'][0]['text'] if message['content'][0]['type'] == 'text' else ""
+            elif isinstance(message['content'], str):  # If content is a string
+                message_content = message['content']
+            else:
+                message_content = ""
+        else:
+            message_content = ""
+
+        new_message = {
+            "id": message.get("id"),
+            "role": message.get("role"),
+            "content": message_content,
+            "date": message.get("date")
+        }
+        output_messages.append(new_message)
+
+    return {"messages": output_messages}
+
 
 @bp.route("/history/update", methods=["POST"])
 async def update_conversation():
@@ -1110,7 +1133,7 @@ async def update_conversation():
         #    messages = transform_array(request_json)
         #else:
         #    messages = request_json["messages"]
-        messages = transform_array(request_json)
+        messages = transform_json(request_json)
         logging.debug(messages)
         if len(messages) > 0 and messages[-1]["role"] == "assistant":
             if len(messages) > 1 and messages[-2].get("role", None) == "tool":
