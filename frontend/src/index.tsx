@@ -13,22 +13,26 @@ import './index.css'
 initializeIcons()
 
 export default function App() {
-  return (
-    <AppStateProvider>
-      <HashRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Chat />} />
-            <Route path="*" element={<NoPage />} />
-          </Route>
-        </Routes>
-      </HashRouter>
-    </AppStateProvider>
-  )
+    const theme = localStorage.getItem('designTheme');
+    if (theme) {
+        document.body.setAttribute("data-theme", theme)
+    }
+    return (
+        <AppStateProvider>
+            <HashRouter>
+                <Routes>
+                    <Route path="/" element={<Layout />}>
+                        <Route index element={<Chat />} />
+                        <Route path="*" element={<NoPage />} />
+                    </Route>
+                </Routes>
+            </HashRouter>
+        </AppStateProvider>
+    )
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    <React.StrictMode>
+        <App />
+    </React.StrictMode>
 )
