@@ -19,39 +19,38 @@ import { XSSAllowTags } from "../../constants/xssAllowTags";
 import Contoso from "../../assets/comos.png";
 
 interface Props {
-  answer: AskResponse
-  onCitationClicked: (citedDocument: Citation) => void
+    answer: AskResponse
+    onCitationClicked: (citedDocument: Citation) => void
 }
 
 export const Answer = ({ answer, onCitationClicked }: Props) => {
-  const initializeAnswerFeedback = (answer: AskResponse) => {
-    if (answer.message_id == undefined) return undefined
-    if (answer.feedback == undefined) return undefined
-    if (answer.feedback.split(',').length > 1) return Feedback.Negative
-    if (Object.values(Feedback).includes(answer.feedback)) return answer.feedback
-    return Feedback.Neutral
-  }
+    const initializeAnswerFeedback = (answer: AskResponse) => {
+        if (answer.message_id == undefined) return undefined
+        if (answer.feedback == undefined) return undefined
+        if (answer.feedback.split(',').length > 1) return Feedback.Negative
+        if (Object.values(Feedback).includes(answer.feedback)) return answer.feedback
+        return Feedback.Neutral
+    }
 
-  const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false)
-  const filePathTruncationLimit = 50
+    const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false)
+    const filePathTruncationLimit = 50
     const parsedAnswer = useMemo(() => parseAnswer(answer), [answer]);
     const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen);
     const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer));
     const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
     const [isPositiveFeedbackDialogOpen, setIsPositiveFeedbackDialogOpen] = useState(false);
     const [showReportInappropriateFeedback, setShowReportInappropriateFeedback] = useState(false);
-    const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([]);
+    const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([]);    
     const [positiveFeedbackList, setPositiveFeedbackList] = useState<Feedback[]>([]);
     const appStateContext = useContext(AppStateContext)
     const FEEDBACK_ENABLED = appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB;
-    const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer
-
+    const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer    
     const handleChevronClick = () => {
         setChevronIsExpanded(!chevronIsExpanded);
         toggleIsRefAccordionOpen();
-    };  
+    };
 
-    useEffect(() => {
+    useEffect(() => {      
         if (answer.message_id == undefined) return;
 
         let currentFeedbackState;
@@ -268,22 +267,21 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
                                         aria-hidden="false"
                                         aria-label="Like this response"
                                         onClick={() => onLikeResponseClicked()}
-                                        style={feedbackState === Feedback.Positive || appStateContext?.state.feedbackState[answer.message_id] === Feedback.Positive ?
-                                            { color: "#00D7A0", cursor: "pointer" } :
-                                            { color: "white", cursor: "pointer" }}
+                                        className={feedbackState === Feedback.Positive || appStateContext?.state.feedbackState[answer.message_id] === Feedback.Positive ?
+                                            styles.positiveFeedback :
+                                            styles.neutralFeedback}
                                     />
                                     <ThumbDislike20Filled
                                         aria-hidden="false"
                                         aria-label="Dislike this response"
                                         onClick={() => onDislikeResponseClicked()}
-                                        style={(feedbackState !== Feedback.Positive && feedbackState !== Feedback.Neutral && feedbackState !== undefined) ?
-                                            { color: "#EF0137", cursor: "pointer" } :
-                                            { color: "white", cursor: "pointer" }}
+                                        className={(feedbackState !== Feedback.Positive && feedbackState !== Feedback.Neutral && feedbackState !== undefined) ?
+                                            styles.negativeFeedback :
+                                            styles.neutralFeedback}
                                     />
                                 </Stack>}
                             </Stack.Item>
                         </Stack>
-
                     </Stack.Item>
                     <Stack horizontal className={styles.answerFooter}>
                         {!!parsedAnswer.citations.length && (

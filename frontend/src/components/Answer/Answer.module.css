@@ -14,7 +14,7 @@
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
-    color: white;
+    color: var(--bg-color-message-text-foreground) !important;
     flex: none;
     order: 1;
     align-self: stretch;
@@ -53,7 +53,7 @@
     display: flex;
     align-items: center;
     text-align: center;
-    color: white;
+    color: var(--bg-color-message-text-foreground) !important;
     flex: none;
     order: 1;
     flex-grow: 0;
@@ -183,15 +183,20 @@ sup {
 }
 
 .profileImageContainer {
-    margin-right: 10px;
-    align-items: flex-end;
+    margin-right: 10px;    
     display: flex;
+    vertical-align: bottom;
+    background: var(--bg-img-answer-color) !important;
+    border-radius: 50%;
+    height: 44px;
+    width: 44px;    
+    align-items: center;
 }
 
 .profileImage {
     width: 40px;
     max-height: 40px;
-    vertical-align: bottom;
+    vertical-align: bottom;        
 }
 
 
@@ -215,4 +220,17 @@ sup {
   .answerDisclaimer {
     margin-bottom: 5px;
   }
+}
+
+.positiveFeedback{
+    cursor: pointer;
+    color: #00D7A0;    
+}
+.negativeFeedback{
+    cursor: pointer;
+    color: #EF0137;
+}
+.neutralFeedback{
+    cursor: pointer;
+    color: var(--bg-color-icon) !important;
 }

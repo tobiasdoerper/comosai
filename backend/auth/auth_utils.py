@@ -1,3 +1,5 @@
+import requests
+import logging
 def get_authenticated_user_details(request_headers):
     user_object = {}
 
@@ -16,5 +18,19 @@ def get_authenticated_user_details(request_headers):
     user_object['auth_token'] = raw_user_object.get('X-Ms-Token-Aad-Id-Token')
     user_object['client_principal_b64'] = raw_user_object.get('X-Ms-Client-Principal')
     user_object['aad_id_token'] = raw_user_object.get('X-Ms-Token-Aad-Id-Token')
-
+    get_user_profile_image(user_object['auth_token'])
     return user_object
+
+def get_user_profile_image(access_token):
+    graph_endpoint = "https://graph.microsoft.com/v1.0/me/photo/$value"
+
+    # Setze die Header mit dem Zugriffstoken
+    headers = {
+        "Authorization": "Bearer " + access_token
+    }
+
+    # Mache eine GET-Anfrage, um das Profilbild abzurufen
+    response = requests.get(graph_endpoint, headers=headers)
+    if response.status_code == 200:
+        logging.debug("tobis", response)
+    return ""

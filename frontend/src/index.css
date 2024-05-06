@@ -11,17 +11,25 @@ body{
     --bg-color-borders: white;
     --bg-color-answer: #333353;
     --bg-color-question: #00646e;
+    --bg-color-content:White;
+    --bg-chat-container:rgba(243, 243, 240, 0.16);
+    --bg-color-message-text-foreground: white;/*var(--bg-color-message-text-foreground) !important;*/    
+    --bg-img-answer-color: transparent;
 }
 
 body[data-theme="comos"] {
-    --bg-color: #92b9bd;
+    --bg-color: #E5E5E9;
     --bg-link: blue;
-    --bg-color-headers: White; /*var(--bg-color-headers) !important;*/
-    --bg-color-icon:White;/*var(--bg-color-icon) !important;*/
-    --bg-color-headers-light: rgba(255, 255, 255, 0.664);
-    --bg-color-borders: White;
-    --bg-color-answer: #8ca3af;
-    --bg-color-question: #abaeb1;
+    --bg-color-headers: black; /*var(--bg-color-headers) !important;*/
+    --bg-color-icon:Black;/*var(--bg-color-icon) !important;*/
+    --bg-color-content:black;/*var(--bg-color-icon) !important;*/
+    --bg-color-headers-light: rgba(83, 83, 83, 0.664);
+    --bg-color-borders: black;
+    --bg-color-answer: #E5E5E9;
+    --bg-color-message-text-foreground: black;
+    --bg-color-question: #E0F1F4;
+    --bg-chat-container:rgba(255, 255, 255, 0.7);/*var(--bg-chat-container) !important;*/    
+    --bg-img-answer-color: #E5E5E9;
 }
 
 html,

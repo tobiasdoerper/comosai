@@ -1051,7 +1051,8 @@ async def add_conversation():
 
         ## Format the incoming message object in the "chat/completions" messages format
         ## then write it to the conversation history in cosmos
-        messages = request_json["messages"]
+        #messages = request_json["messages"]
+        messages = transform_json(request_json)
         if len(messages) > 0 and messages[-1]["role"] == "user":
             global messageID
             messageID = str(uuid.uuid4())    
@@ -1324,24 +1325,26 @@ async def get_conversation():
 
     ## format the messages in the bot frontend format
     messages = [
-        {
-            'id': msg['id'],
-            'role': msg['role'],
-            'content': [{
+    {
+        'id': msg['id'],
+        'role': msg['role'],
+        'content': [
+            {
                 'type': 'text',
                 'text': msg['content']
-            },
-            {
-                'type':'image_url',
-                'image_url':{
-                    'url': download_image_internal(msg['attachmentId']) if 'attachmentId' in msg else ''
-                }
             }
-            ],            
-            'createdAt': msg['createdAt'],
-            'feedback': msg.get('feedback')
-            
-        } for msg in conversation_messages]
+        ] + (
+            [{
+                'type':'image_url',
+                'image_url': {
+                    'url': download_image_internal(msg['attachmentId'])
+                }
+            }] if 'attachmentId' in msg else []
+        ),
+        'createdAt': msg['createdAt'],
+        'feedback': msg.get('feedback')
+    } for msg in conversation_messages
+    ]
     
     await cosmos_conversation_client.cosmosdb_client.close()
     return jsonify({"conversation_id": conversation_id, "messages": messages}), 200
