@@ -14,9 +14,10 @@ import remarkGfm from "remark-gfm";
 import supersub from 'remark-supersub'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { ThumbDislike20Filled, ThumbLike20Filled } from "@fluentui/react-icons";
+import { Checkmark20Filled, Clipboard20Filled, ThumbDislike20Filled, ThumbLike20Filled } from "@fluentui/react-icons";
 import { XSSAllowTags } from "../../constants/xssAllowTags";
 import Contoso from "../../assets/comos.png";
+import Contoso_Gray from "../../assets/comos_gray.png";
 
 interface Props {
     answer: AskResponse
@@ -39,18 +40,40 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
     const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer));
     const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
     const [isPositiveFeedbackDialogOpen, setIsPositiveFeedbackDialogOpen] = useState(false);
+    const [showCheckMarkOnClipBoard, setCheckMarkOnClipBoard] = useState(false);
     const [showReportInappropriateFeedback, setShowReportInappropriateFeedback] = useState(false);
-    const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([]);    
+    const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([]);
     const [positiveFeedbackList, setPositiveFeedbackList] = useState<Feedback[]>([]);
     const appStateContext = useContext(AppStateContext)
+    const [logo, setImage] = useState(() => {
+        if(localStorage.getItem("designTheme") && localStorage.getItem("designTheme") == "")
+            return Contoso;
+        else
+            return Contoso_Gray;
+    })
+
     const FEEDBACK_ENABLED = appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB;
-    const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer    
+    const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer
     const handleChevronClick = () => {
         setChevronIsExpanded(!chevronIsExpanded);
         toggleIsRefAccordionOpen();
     };
+    
+    useEffect(() => {
+        function handleClick() {           
+            if (localStorage.getItem('designTheme') == "") {
+                setImage(Contoso)
+            } else {
+                setImage(Contoso_Gray)
+            }
+        }
+        document.body.addEventListener('click', handleClick);
+        return () => {
+            document.body.removeEventListener('click', handleClick);
+        };
+    }, [document.body.getAttribute("data-theme")]);
 
-    useEffect(() => {      
+    useEffect(() => {
         if (answer.message_id == undefined) return;
 
         let currentFeedbackState;
@@ -148,6 +171,18 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
         setPositiveFeedbackList(feedbackList);
     };
 
+    const copyToResultToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setCheckMarkOnClipBoard(true);
+            setTimeout(function () {
+                setCheckMarkOnClipBoard(false);
+            }, 1500);
+        }).catch((error) => {
+            console.error('Error copying to clipboard:', error);
+            setCheckMarkOnClipBoard(false);
+        });
+    }
+
     const onSubmitNegativeFeedback = async () => {
         if (answer.message_id == undefined) return;
         if (answer.feedback_content && answer.feedback_content !== "") {
@@ -222,6 +257,13 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
             </>
         );
     }
+    const ClipBoardIcon = () => {
+        if (showCheckMarkOnClipBoard) {
+            return <Checkmark20Filled className={styles.neutralFeedback}></Checkmark20Filled>
+        } else {
+            return <Clipboard20Filled className={styles.neutralFeedback} onClick={() => copyToResultToClipboard(answer.answer.text!)} />
+        }
+    }
     const components = {
         code({ node, ...props }: { node: any, [key: string]: any }) {
             let language;
@@ -244,7 +286,7 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
                 <div className={styles.profileImageContainer}>
                     <img
                         className={styles.profileImage}
-                        src={Contoso}
+                        src={logo}
                         aria-hidden="true"
                     />
                 </div>
@@ -263,6 +305,9 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
                             </Stack.Item>
                             <Stack.Item className={styles.answerHeader}>
                                 {FEEDBACK_ENABLED && answer.message_id !== undefined && <Stack horizontal horizontalAlign="space-between">
+                                    <Stack>
+                                        <ClipBoardIcon />
+                                    </Stack>
                                     <ThumbLike20Filled
                                         aria-hidden="false"
                                         aria-label="Like this response"

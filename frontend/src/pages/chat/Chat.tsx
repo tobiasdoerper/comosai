@@ -11,6 +11,7 @@ import DOMPurify from 'dompurify';
 
 import styles from "./Chat.module.css";
 import Contoso from "../../assets/comos.png";
+import Contoso_Gray from "../../assets/comos_gray.png";
 import Loading from "../../assets/loading.svg";
 import { XSSAllowTags } from "../../constants/xssAllowTags";
 
@@ -49,7 +50,7 @@ const enum messageStatus {
 
 const Chat = () => {
     const appStateContext = useContext(AppStateContext)
-    const ui = appStateContext?.state.frontendSettings?.ui; 
+    const ui = appStateContext?.state.frontendSettings?.ui;
     const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled;
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -64,6 +65,12 @@ const Chat = () => {
     const [clearingChat, setClearingChat] = useState<boolean>(false);
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
     const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>();
+    const [logo, setImage] = useState(() => {
+        if(localStorage.getItem("designTheme") && localStorage.getItem("designTheme") == "")
+            return Contoso;
+        else
+            return Contoso_Gray;
+    })
 
     const errorDialogContentProps = {
         type: DialogType.close,
@@ -93,8 +100,22 @@ const Chat = () => {
                 subtitle: subtitle
             })
             toggleErrorDialog();
-        }       
+        }
     }, [appStateContext?.state.isCosmosDBAvailable]);
+
+    useEffect(() => {
+        function handleClick() {           
+            if (localStorage.getItem('designTheme') == "") {
+                setImage(Contoso)
+            } else {
+                setImage(Contoso_Gray)
+            }
+        }
+        document.body.addEventListener('click', handleClick);
+        return () => {
+            document.body.removeEventListener('click', handleClick);
+        };
+    }, [document.body.getAttribute("data-theme")]);
 
     const handleErrorDialogClose = () => {
         toggleErrorDialog()
@@ -859,8 +880,8 @@ const Chat = () => {
                     <div className={styles.chatContainer} onPaste={handlePaste}>
                         {!messages || messages.length < 1 ? (
                             <Stack className={styles.chatEmptyState}>
-                                <img
-                                    src={ui?.chat_logo ? ui.chat_logo : Contoso}
+                                 <img
+                                    src={ui?.chat_logo ? ui.chat_logo : logo}
                                     className={styles.chatIcon}
                                     aria-hidden="true"
                                 />

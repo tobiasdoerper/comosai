@@ -52,6 +52,16 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
         className={styles.questionInputTextArea}
         placeholder={placeholder}
         multiline
+        styles={{
+          fieldGroup: {
+            borderRadius: 0,
+            border: "0px solid transparent",
+            background: "transparent"
+          },
+          field: {
+            color: "var(--bg-question-input-text) !important"
+          }
+        }}
         resizable={false}
         borderless
         value={question}

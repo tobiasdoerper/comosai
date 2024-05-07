@@ -186,8 +186,6 @@ sup {
     margin-right: 10px;    
     display: flex;
     vertical-align: bottom;
-    background: var(--bg-img-answer-color) !important;
-    border-radius: 50%;
     height: 44px;
     width: 44px;    
     align-items: center;

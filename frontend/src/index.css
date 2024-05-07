@@ -15,13 +15,17 @@ body{
     --bg-chat-container:rgba(243, 243, 240, 0.16);
     --bg-color-message-text-foreground: white;/*var(--bg-color-message-text-foreground) !important;*/    
     --bg-img-answer-color: transparent;
+    --bg-questionInputContainer:white;
+    --bg-questionInputBottomBorder:radial-gradient(109.81% 107.82% at 100.1% 90.19%, #00E6DC 33.63%, #00BEDC 70.31%, #00FFB9 100%);
+    --bg-citationPanel:"transparent";
+    --bg-question-input-text:black;
 }
 
 body[data-theme="comos"] {
     --bg-color: #E5E5E9;
     --bg-link: blue;
     --bg-color-headers: black; /*var(--bg-color-headers) !important;*/
-    --bg-color-icon:Black;/*var(--bg-color-icon) !important;*/
+    --bg-color-icon:black;/*var(--bg-color-icon) !important;*/
     --bg-color-content:black;/*var(--bg-color-icon) !important;*/
     --bg-color-headers-light: rgba(83, 83, 83, 0.664);
     --bg-color-borders: black;
@@ -30,6 +34,10 @@ body[data-theme="comos"] {
     --bg-color-question: #E0F1F4;
     --bg-chat-container:rgba(255, 255, 255, 0.7);/*var(--bg-chat-container) !important;*/    
     --bg-img-answer-color: #E5E5E9;
+    --bg-questionInputContainer:white;
+    --bg-questionInputBottomBorder:#007993;;
+    --bg-citationPanel:"transparent";    
+    --bg-question-input-text:white;
 }
 
 html,

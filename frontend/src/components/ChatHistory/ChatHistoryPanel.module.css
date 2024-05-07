@@ -5,8 +5,8 @@
 }
 
 .listContainer {
-  overflow: hidden auto;
-  max-height: calc(90vh - 105px);
+    overflow: hidden auto;
+    max-height: calc(90vh - 105px);
 }
 
 .itemCell {
@@ -20,24 +20,22 @@
     box-sizing: border-box;
     border-radius: 5px;
     display: flex;
-    color: white;
+    color: var(--bg-color-message-text-foreground) !important;
 }
 
 .itemCell:hover {
-    background: #333353;    
+    background: var(--bg-chat-container) !important;
 }
 
 .itemButton {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid #d1d1d1;
-  border-radius: 5px;
-  background-color: white;
-  margin: auto 2.5px;
-  cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 28px;
+    height: 28px;
+    color: var(--bg-color-icon) !important;
+    margin: auto 2.5px;
+    cursor: pointer;
 }
 
 .itemButton:hover {
@@ -45,19 +43,19 @@
 }
 
 .chatGroup {
-  margin: auto 5px;
-  width: 100%;
+    margin: auto 5px;
+    width: 100%;
 }
 
 .spinnerContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
 }
 
 .chatList {
-  width: 100%;
+    width: 100%;
 }
 
 .chatMonth {
@@ -65,7 +63,7 @@
     font-weight: 600;
     margin-bottom: 5px;
     padding-left: 15px;
-    color:white;
+    color: var(--bg-color-message-text-foreground) !important;
 }
 
 .chatTitle {
@@ -73,11 +71,32 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    color: white;
+    color: var(--bg-color-message-text-foreground) !important;
+}
+
+.commandBarStyle {
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    background-color: transparent;
+    color: var(--bg-color-icon) !important;
+}
+
+.commandBarStyle:hover {
+    background-color: transparent;
+}
+
+.header {
+    align-self: center;
+    font-weight: 600;
+    font-size: 18px;
+    margin-right: auto;
+    padding-left: 20px;
+    color: var(--bg-color-message-text-foreground) !important;
 }
 
 @media (max-width: 480px) {
-  .container {
-    width: 100%;
-  }
+    .container {
+        width: 100%;
+    }
 }

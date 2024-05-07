@@ -23,7 +23,7 @@ const Layout = () => {
     const [showHistoryLabel, setShowHistoryLabel] = useState<string>('Show chat history')
     const appStateContext = useContext(AppStateContext)
     const ui = appStateContext?.state.frontendSettings?.ui
-    const appVersion: string = packageJSON.version; 
+    const appVersion: string = packageJSON.version;     
     const handleShareClick = () => {
         setIsSharePanelOpen(true)
     }
@@ -55,8 +55,8 @@ const Layout = () => {
             localStorage.setItem('designTheme', "");
             appStateContext!.state.frontendSettings!.ui!.design_theme = ""
         }
-    }
-
+    }  
+    
     useEffect(() => {
         if (copyClicked) {
             setCopyText('Copied URL')
