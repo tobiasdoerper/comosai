@@ -37,7 +37,7 @@ body[data-theme="comos"] {
     --bg-questionInputContainer:white;
     --bg-questionInputBottomBorder:#007993;;
     --bg-citationPanel:"transparent";    
-    --bg-question-input-text:white;
+    --bg-question-input-text:black;
 }
 
 html,
