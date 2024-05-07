@@ -403,7 +403,7 @@
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
-  color: white;
+  color: var(--bg-color-message-text-foreground) !important;
   flex: none;
   order: 1;
   align-self: stretch;
